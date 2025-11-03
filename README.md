@@ -15,6 +15,9 @@
 
 ## ✨ update 更新
 
+#### v2.0.0-beta
+- 增加recent命令，生成最近战报
+
 
 #### 1.11.0  --  1.11.6:
 
@@ -47,16 +50,17 @@
 
 ### 指令式
 
-| 功能        | 命令格式                                     | 参数说明                                | 备注            | 别名     |
-|-----------|------------------------------------------|-------------------------------------|---------------|--------|
-| **账号绑定**  | `{唤醒词}bind [ea_name]`                    | `ea_name`: EA账号名                    | -             | `/绑定`  |
-| **默认查询**  | `{唤醒词}bf_init [游戏代号]`                    | 游戏代号                                | 群聊中仅bot管理员可用  | -      |
-| **查询战绩**  | `{唤醒词}stat [ea_name],game=[游戏代号]`        | `ea_name`: EA账号名<br>`game`: 游戏代号    | -             | -      |
-| **武器统计**  | `{唤醒词}weapons [ea_name],game=[游戏代号]`     | `ea_name`: EA账号名<br>`game`: 游戏代号    | -             | `/武器`  |
-| **载具统计**  | `{唤醒词}vehicles [ea_name],game=[游戏代号]`    | `ea_name`: EA账号名<br>`game`: 游戏代号    | -             | `/载具`  |
-| **士兵统计**  | `{唤醒词}soldiers [ea_name],game=bf2042`    | `ea_name`: EA账号名<br>`game`: bf2042  | 仅支持bf2042、bf6 | `/士兵`  |
-| **服务器查询** | `{唤醒词}servers [server_name],game=[游戏代号]` | `server_name`: 服务器名<br>`game`: 游戏代号 | -             | `/服务器` |
-| **帮助**    | `{唤醒词}bf_help`                           | -                                   | -             | -      |
+| 功能        | 命令格式                                     | 参数说明                                | 备注          | 别名     |
+|-----------|------------------------------------------|-------------------------------------|-------------|--------|
+| **账号绑定**  | `{唤醒词}bind [ea_name]`                    | `ea_name`: EA账号名                    | -           | `/绑定`  |
+| **默认查询**  | `{唤醒词}bf_init [游戏代号]`                    | 游戏代号                                | 群聊中仅bot管理员可用 | -      |
+| **查询战绩**  | `{唤醒词}stat [ea_name],game=[游戏代号]`        | `ea_name`: EA账号名<br>`game`: 游戏代号    | -           | -      |
+| **武器统计**  | `{唤醒词}weapons [ea_name],game=[游戏代号]`     | `ea_name`: EA账号名<br>`game`: 游戏代号    | -           | `/武器`  |
+| **载具统计**  | `{唤醒词}vehicles [ea_name],game=[游戏代号]`    | `ea_name`: EA账号名<br>`game`: 游戏代号    | -           | `/载具`  |
+| **士兵统计**  | `{唤醒词}soldiers [ea_name],game=bf2042`    | `ea_name`: EA账号名<br>`game`: 游戏代号  | 仅支持bf2042、bf6 | `/士兵`  |
+| **战报**    | `{唤醒词}recent [ea_name],game=6`           | `ea_name`: EA账号名<br>`game`: bf6     | 仅支持bf6 | `/战报`  |
+| **服务器查询** | `{唤醒词}servers [server_name],game=[游戏代号]` | `server_name`: 服务器名<br>`game`: 游戏代号 | -           | `/服务器` |
+| **帮助**    | `{唤醒词}bf_help`                           | -                                   | -           | -      |
 
 💡 提示
 
@@ -87,6 +91,7 @@
   <img src="./README/image/示例_bfv.jpg" width="20%" alt="bfv战绩查询效果"/>
   <img src="./README/image/示例_bf2042.jpg" width="20%" alt="bf2042战绩查询效果"/>
   <img src="./README/image/示例_bf6.jpg" width="20%" alt="bf6战绩查询效果"/>
+  <img src="./README/image/bf6战报示例.jpg" width="20%" alt="战报"/>
 </div>
 
 #### 让 LLM 调用工具
