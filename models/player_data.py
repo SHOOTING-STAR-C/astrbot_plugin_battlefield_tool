@@ -11,3 +11,4 @@ class PlayerDataRequest:
     game: Union[str, None]
     server_name: Union[str, None]
     error_msg: Union[str, None]
+    page: int = 1
