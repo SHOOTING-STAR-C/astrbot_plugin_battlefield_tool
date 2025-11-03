@@ -3,6 +3,7 @@ from astrbot.api import logger
 
 from ..core.request_util import (gt_request_api, btr_request_api)
 from ..core.plugin_logic import PlayerDataRequest, BattlefieldPluginLogic
+from ..core.utils import format_datetime_string
 
 
 class ApiHandlers:
@@ -15,7 +16,7 @@ class ApiHandlers:
         self._session = session
 
     async def fetch_gt_data(self, event: AstrMessageEvent, request_data: PlayerDataRequest, data_type: str,
-                            prop: str = None,is_llm:bool = False):
+                            prop: str = None, is_llm: bool = False):
         """
         根据游戏类型获取数据并处理响应 (非bf6/bf2042)。
         """
@@ -27,10 +28,10 @@ class ApiHandlers:
             session=self._session,
         )
 
-        async for result in self.plugin_logic.process_api_response(
-                event, api_data, data_type, request_data.game, self.html_render,is_llm
-        ):
-            yield result
+        result = await self.plugin_logic.process_api_response(
+            event, api_data, data_type, request_data.game, self.html_render, is_llm
+        ).__anext__()
+        yield result
 
     async def _fetch_btr_data(self, event: AstrMessageEvent, request_data: PlayerDataRequest, data_type: str):
         """
@@ -55,7 +56,17 @@ class ApiHandlers:
 
         api_data = await btr_request_api(
             btr_prop,
-            {"player_name": request_data.ea_name, "game": request_data.game,"pider": request_data.pider},
+            {"player_name": request_data.ea_name, "game": request_data.game, "pider": request_data.pider},
+            self.timeout_config,
+            self.ssc_token,
+            session=self._session,
+        )
+        yield api_data
+
+    async def _fetch_btr_matches_data(self, event: AstrMessageEvent, request_data: PlayerDataRequest, update_hash: str):
+        api_data = await btr_request_api(
+            "/bf6/matches",
+            {"player_name": request_data.ea_name, "update_hash": update_hash},
             self.timeout_config,
             self.ssc_token,
             session=self._session,
@@ -71,7 +82,9 @@ class ApiHandlers:
         soldier_data = []
 
         if request_data.game == "bf6":
-            async for data in self._fetch_btr_data(event, request_data, "bf6_stat"):
+            data_iterator = self._fetch_btr_data(event, request_data, "bf6_stat")
+            try:
+                data = await data_iterator.__anext__()
                 stat_data = data
                 if isinstance(data, list):
                     user_info_list = []
@@ -79,7 +92,8 @@ class ApiHandlers:
                         handle = user.get("platformUserHandle", "未知")
                         identifier = user.get("platformUserIdentifier", "未知")
                         user_info_list.append(f"用户名: {handle}, platformUserIdentifier: {identifier}")
-                    yield "查询到多个用户：\n" + "\n".join(user_info_list) + "\n请先使用 stat pider=pider 查询各个战绩确认哪个是您，然后使用bind pider=pider绑定您的pid"
+                    yield "查询到多个用户：\n" + "\n".join(
+                        user_info_list) + "\n请先使用 stat pider=pider 查询各个战绩确认哪个是您，然后使用bind pider=pider绑定您的pid"
                     return
                 else:
                     result_data = data.get("segments")
@@ -93,26 +107,62 @@ class ApiHandlers:
                         if result["type"] == "vehicle":
                             vehicle_data.append(result)
                             continue
+            except StopAsyncIteration:
+                pass
 
         else:
-            async for data in self._fetch_btr_data(event, request_data, "stat"):
-                stat_data = data
+            stat_data = await self._fetch_btr_data(event, request_data, "stat").__anext__()
 
             if prop in ["stat", "weapons"]:
-                async for data in self._fetch_btr_data(event, request_data, "weapons"):
-                    weapon_data = data
+                weapon_data = await self._fetch_btr_data(event, request_data, "weapons").__anext__()
 
             if prop in ["stat", "vehicles"]:
-                async for data in self._fetch_btr_data(event, request_data, "vehicles"):
-                    vehicle_data = data
+                vehicle_data = await self._fetch_btr_data(event, request_data, "vehicles").__anext__()
 
             if prop in ["stat", "soldiers"]:
-                async for data in self._fetch_btr_data(event, request_data, "soldiers"):
-                    soldier_data = data
+                soldier_data = await self._fetch_btr_data(event, request_data, "soldiers").__anext__()
 
-        async for result in self.plugin_logic.handle_btr_response(event, prop, request_data.game,
-                                                                  self.html_render, stat_data, weapon_data,
-                                                                  vehicle_data, soldier_data, is_llm):
+        result = await self.plugin_logic.handle_btr_response(prop, request_data.game,
+                                                             self.html_render, stat_data, weapon_data,
+                                                             vehicle_data, soldier_data, is_llm).__anext__()
+        yield result
+
+    async def handle_btr_matches(self, event: AstrMessageEvent, request_data: PlayerDataRequest,provider, is_llm: bool = False):
+        """查询bf6的最近战局统计数据"""
+        data_iterator = self._fetch_btr_data(event, request_data, "bf6_stat")
+        data = await data_iterator.__anext__()
+        if isinstance(data, list):
+            user_info_list = []
+            for user in data:
+                handle = user.get("platformUserHandle", "未知")
+                identifier = user.get("platformUserIdentifier", "未知")
+                user_info_list.append(f"用户名: {handle}, platformUserIdentifier: {identifier}")
+            yield "查询到多个用户：\n" + "\n".join(
+                user_info_list) + "\n请先使用 stat pider=pider 查询各个战绩确认哪个是您，然后使用bind pider=pider绑定您的pid"
+            return
+        else:
+            update_hash = data.get("metadata").get("updateHash")
+            matches_data = await self._fetch_btr_matches_data(event, request_data, update_hash).__anext__()
+            if request_data.page > 1:
+                page = request_data.page - 1
+            else:
+                page = 0
+
+            if len(matches_data.get("matches")) < page:
+                yield "暂无数据"
+                return
+
+            stats_data = matches_data.get("matches")[page].get("segments")[0].get("stats")
+            matches_timestamp = format_datetime_string(matches_data.get("matches")[page].get("metadata").get("timestamp"))
+            weapon_data = matches_data.get("matches")[page].get("segments")[0].get("metadata").get("weapons")
+            vehicle_data = matches_data.get("matches")[page].get("segments")[0].get("metadata").get("vehicles")
+            soldier_data = matches_data.get("matches")[page].get("segments")[0].get("metadata").get("kits")
+            mode_data = matches_data.get("matches")[page].get("segments")[0].get("metadata").get("gamemodes")
+            maps_data = matches_data.get("matches")[page].get("segments")[0].get("metadata").get("levels")
+
+            result = await self.plugin_logic.handle_btr_matches_response("bf6",request_data.ea_name, self.html_render, stats_data,
+                                                                         weapon_data, vehicle_data, soldier_data,
+                                                                         mode_data, maps_data,matches_timestamp,provider).__anext__()
             yield result
 
     async def fetch_gt_servers_data(self, request_data: PlayerDataRequest, timeout_config: int, session):

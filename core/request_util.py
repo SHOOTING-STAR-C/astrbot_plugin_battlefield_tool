@@ -8,8 +8,8 @@ from typing import Optional
 
 
 GAMETOOLS_API_SITE = "https://api.gametools.network/"
-BTR_API_SITE = "https://battlefield.shooting-star-c.top/api"
-# BTR_API_SITE = "http://localhost:8766/api"
+# BTR_API_SITE = "https://battlefield.shooting-star-c.top/api"
+BTR_API_SITE = "http://localhost:8766/api"
 SUPPORTED_GAMES = ["bf4","bf1", "bfv"]
 
 

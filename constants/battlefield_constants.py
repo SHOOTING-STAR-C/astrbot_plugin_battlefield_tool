@@ -20,6 +20,7 @@ class ImageUrls:
     BF1_BANNER = "https://s1.ax1x.com/2022/12/15/zoMaxe.jpg"
     BFV_BANNER = "https://s1.ax1x.com/2022/12/14/z54oIs.jpg"
     BF2042_BANNER = "https://s21.ax1x.com/2025/09/25/pV5v1pV.jpg"
+    BF6_BACKGROUND = "http://tutu.shooting-star-c.top/i/2025/11/02/ed70295c17714c629c121e1418c4443f.jpg"
     BF6_BANNER = {
         "突击": "https://s21.ax1x.com/2025/10/11/pVbprc9.jpg",
         "支援": "https://s21.ax1x.com/2025/10/11/pVbp6n1.jpg",
@@ -771,6 +772,7 @@ class ImageUrls:
             "bf2042_banner": cls.BF2042_BANNER,
             "BF6_BANNER": cls.BF6_BANNER,
             "default_avatar": cls.DEFAULT_AVATAR,
+            "BF6_BACKGROUND": cls.BF6_BACKGROUND,
             "su_50": cls.SU_50
         }
 
@@ -796,6 +798,7 @@ class GameMappings:
         "bfv": ImageUrls.BFV_BANNER,
         "bf2042": ImageUrls.BF2042_BANNER,
         "bf6": ImageUrls.BF6_BANNER,
+        "bf6-background": ImageUrls.BF6_BACKGROUND,
     }
 
     # 背景色映射
@@ -851,6 +854,8 @@ class TemplateConstants:
             "btr_weapons": btr_env.get_template("template_weapons.html"),
             "btr_vehicles": btr_env.get_template("template_vehicles.html"),
             "btr_soldiers": btr_env.get_template("template_soldier.html"),
+            "btr_matches": btr_env.get_template("template_matches.html"),
+
             # "btr_servers": env.get_template("template_servers.html"),
             "btr_weapon_card": btr_env.get_template("weapon_card.html"),
             "btr_vehicle_card": btr_env.get_template("vehicle_card.html"),

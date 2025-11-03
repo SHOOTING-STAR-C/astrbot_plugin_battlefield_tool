@@ -24,22 +24,13 @@ class BattlefieldTool(Star):
         self.config = config
         self.wake_prefix = context.get_config().get("wake_prefix")
 
-        # 防御性配置处理：如果config为None，使用默认值
-        if config is None:
-            logger.warning("BattlefieldTool: 未提供配置文件，将使用默认配置")
-            self.default_game = "bfv"
-            self.timeout_config = 15
-            self.img_quality = 90
-            self.ssc_token = ""
-            self.bf_prompt = "请根据以下评判标准和数据从多个方面评价用户的游戏水平，注意要结合人设和上下文，保证对话不冲突，1.K/D(击杀/死亡比):薯薯:小于1，Pro:大于2.5说明： 高KD是Pro哥基础，但单纯KD高可能是架枪蹲人。Pro哥的KD是在高强度突击和救点中打出来的。2.KPM(每分钟击杀):薯薯:小于0.7，Pro:大于1.5说明： 这是衡量你击杀效率的关键指标。KPM低而KD高，大概率是喜欢偷偷地躲起来蹲人，可以适当调侃这些胆小鬼。3.命中率&爆头率这个指标要综合判断，不能直接根据这个参数判断是不是pro哥命中率要根据枪械来看，喷子命中即使超过100%也是正常的，其他种类枪械正常玩家也不会太高爆头率狙击枪超过90%也可以算正常玩家过低的爆头率可能是载具玩家两个指标都超过50%很有可能是挂钩，遇到挂钩直接开喷，谨慎使用，枪械数据量较少时可能是巧合4.急救数神医专属指标5.载具注意击杀和摧毁，击杀特别多但摧毁特别少的那就是捞薯凶手、恐怖铁皮人(只能用来调侃坦克)补充：可以根据玩家使用武器、载具、飞机的偏好分为不同的Pro哥"
-        else:
-            logger.debug("BattlefieldTool: 使用用户配置文件")
-            self.default_game = config.get("default_game", "bfv")
-            self.timeout_config = config.get("timeout_config", 15)
-            self.img_quality = config.get("img_quality", 90)
-            self.ssc_token = config.get("ssc_token", "")
-            self.bf_prompt = config.get("bf_prompt",
-                                        "请根据以下评判标准和数据从多个方面评价用户的游戏水平，注意要结合人设和上下文，保证对话不冲突，1.K/D(击杀/死亡比):薯薯:小于1，Pro:大于2.5说明： 高KD是Pro哥基础，但单纯KD高可能是架枪蹲人。Pro哥的KD是在高强度突击和救点中打出来的。2.KPM(每分钟击杀):薯薯:小于0.7，Pro:大于1.5说明： 这是衡量你击杀效率的关键指标。KPM低而KD高，大概率是喜欢偷偷地躲起来蹲人，可以适当调侃这些胆小鬼。3.命中率&爆头率这个指标要综合判断，不能直接根据这个参数判断是不是pro哥命中率要根据枪械来看，喷子命中即使超过100%也是正常的，其他种类枪械正常玩家也不会太高爆头率狙击枪超过90%也可以算正常玩家过低的爆头率可能是载具玩家两个指标都超过50%很有可能是挂钩，遇到挂钩直接开喷，谨慎使用，枪械数据量较少时可能是巧合4.急救数神医专属指标5.载具注意击杀和摧毁，击杀特别多但摧毁特别少的那就是捞薯凶手、恐怖铁皮人(只能用来调侃坦克)补充：可以根据玩家使用武器、载具、飞机的偏好分为不同的Pro哥")
+        self.default_game = config.get("default_game", "bfv")
+        self.timeout_config = config.get("timeout_config", 15)
+        self.img_quality = config.get("img_quality", 90)
+        self.ssc_token = config.get("ssc_token", "")
+        self.evaluation_provider = config.get("evaluation_provider", None)
+        self.bf_prompt = config.get("bf_prompt",
+                                    "请根据以下评判标准和数据从多个方面评价用户的游戏水平，注意要结合人设和上下文，保证对话不冲突，1.K/D(击杀/死亡比):薯薯:小于1，Pro:大于2.5说明： 高KD是Pro哥基础，但单纯KD高可能是架枪蹲人。Pro哥的KD是在高强度突击和救点中打出来的。2.KPM(每分钟击杀):薯薯:小于0.7，Pro:大于1.5说明： 这是衡量你击杀效率的关键指标。KPM低而KD高，大概率是喜欢偷偷地躲起来蹲人，可以适当调侃这些胆小鬼。3.命中率&爆头率这个指标要综合判断，不能直接根据这个参数判断是不是pro哥命中率要根据枪械来看，喷子命中即使超过100%也是正常的，其他种类枪械正常玩家也不会太高爆头率狙击枪超过90%也可以算正常玩家过低的爆头率可能是载具玩家两个指标都超过50%很有可能是挂钩，遇到挂钩直接开喷，谨慎使用，枪械数据量较少时可能是巧合4.急救数神医专属指标5.载具注意击杀和摧毁，击杀特别多但摧毁特别少的那就是捞薯凶手、恐怖铁皮人(只能用来调侃坦克)补充：可以根据玩家使用武器、载具、飞机的偏好分为不同的Pro哥")
 
         self.bf_data_path = StarTools.get_data_dir("battleField_tool_plugin")
         self.db = BattleFieldDataBase(self.bf_data_path)  # 初始化数据库
@@ -71,14 +62,14 @@ class BattlefieldTool(Star):
         logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
 
         if request_data.game in ["bf2042", "bf6"]:
-            async for result in self.api_handlers.handle_btr_game(event, request_data, "stat"):
-                if not "http" in result:
-                    yield event.plain_result(result)
-                else:
-                    yield event.image_result(result)
-        else:
-            async for result in self.api_handlers.fetch_gt_data(event, request_data, "stat", "all"):
+            result = await self.api_handlers.handle_btr_game(event, request_data, "stat").__anext__()
+            if not "http" in result:
+                yield event.plain_result(result)
+            else:
                 yield event.image_result(result)
+        else:
+            result = await self.api_handlers.fetch_gt_data(event, request_data, "stat", "all").__anext__()
+            yield event.image_result(result)
 
     @filter.command("weapons", alias=["武器"])
     async def bf_weapons(self, event: AstrMessageEvent):
@@ -92,11 +83,11 @@ class BattlefieldTool(Star):
         logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
 
         if request_data.game in ["bf2042", "bf6"]:
-            async for result in self.api_handlers.handle_btr_game(event, request_data, "weapons"):
-                yield event.image_result(result)
+            result = await self.api_handlers.handle_btr_game(event, request_data, "weapons").__anext__()
+            yield event.image_result(result)
         else:
-            async for result in self.api_handlers.fetch_gt_data(event, request_data, "weapons", "weapons"):
-                yield event.image_result(result)
+            result = await self.api_handlers.fetch_gt_data(event, request_data, "weapons", "weapons").__anext__()
+            yield event.image_result(result)
 
     @filter.command("vehicles", alias=["载具"])
     async def bf_vehicles(self, event: AstrMessageEvent):
@@ -109,11 +100,11 @@ class BattlefieldTool(Star):
 
         logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
         if request_data.game in ["bf2042", "bf6"]:
-            async for result in self.api_handlers.handle_btr_game(event, request_data, "vehicles"):
-                yield event.image_result(result)
+            result = await self.api_handlers.handle_btr_game(event, request_data, "vehicles").__anext__()
+            yield event.image_result(result)
         else:
-            async for result in self.api_handlers.fetch_gt_data(event, request_data, "vehicles", "vehicles"):
-                yield event.image_result(result)
+            result = await self.api_handlers.fetch_gt_data(event, request_data, "vehicles", "vehicles").__anext__()
+            yield event.image_result(result)
 
     @filter.command("soldiers", alias=["士兵"])
     async def bf_soldier(self, event: AstrMessageEvent):
@@ -124,13 +115,43 @@ class BattlefieldTool(Star):
             yield event.plain_result(request_data.error_msg)
             return
 
-        if request_data.game not in ['bf2042','bf6']:
-            yield event.plain_result("士兵查询目前仅支持战地2042、bf6。")
+        if request_data.game not in ['bf2042', 'bf6']:
+            yield event.plain_result("士兵查询仅支持战地2042、bf6。")
             return
 
         logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
-        async for result in self.api_handlers.handle_btr_game(event, request_data, "soldiers"):
-            yield event.image_result(result)
+        result = await self.api_handlers.handle_btr_game(event, request_data, "soldiers").__anext__()
+        yield event.image_result(result)
+
+    @filter.command("recent", alias=["最近", "战报"])
+    async def bf_recent(self, event: AstrMessageEvent):
+        """查询最近战局数据 (仅限bf6)"""
+        # 获取provider
+        if not self.evaluation_provider:
+            error_msg = "锐评功能未配置，请在插件设置中指定 Provider ID。"
+            logger.warning(error_msg)
+            yield error_msg
+            return
+        provider = self.context.get_provider_by_id(self.evaluation_provider)
+        if not provider:
+            error_msg = f"无法找到 ID 为 '{self.evaluation_provider}' 的 Provider 实例。"
+            logger.error(error_msg)
+            yield error_msg
+            return
+
+
+        request_data = await self.plugin_logic.handle_player_data_request(event, ["recent", "最近", "战报"])
+        if request_data.error_msg:
+            yield event.plain_result(request_data.error_msg)
+            return
+
+        if request_data.game != "bf6":
+            yield event.plain_result("最近战局查询仅支持战地bf6。")
+            return
+        logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
+
+        result = await self.api_handlers.handle_btr_matches(event, request_data,provider).__anext__()
+        yield event.image_result(result)
 
     @filter.command("servers", alias=["服务器"])
     async def bf_servers(self, event: AstrMessageEvent):
@@ -154,10 +175,10 @@ class BattlefieldTool(Star):
             request_data, self.timeout_config, self._session
         )
 
-        async for result in self.plugin_logic.process_api_response(
-                event, servers_data, "servers", request_data.game, self.html_render
-        ):
-            yield result
+        result = await self.plugin_logic.process_api_response(
+            event, servers_data, "servers", request_data.game, self.html_render
+        ).__anext__()
+        yield result
 
     @filter.command("bind", alias=["绑定"])
     async def bf_bind(self, event: AstrMessageEvent):
@@ -199,11 +220,11 @@ class BattlefieldTool(Star):
             return
         logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
         if request_data.game in ["bf2042", "bf6"]:
-            async for result in self.api_handlers.handle_btr_game(event, request_data, "stat", True):
-                yield result
+            result = await self.api_handlers.handle_btr_game(event, request_data, "stat", True).__anext__()
+            yield result
         else:
-            async for result in self.api_handlers.fetch_gt_data(event, request_data, "stat", "all", True):
-                yield result
+            result = await self.api_handlers.fetch_gt_data(event, request_data, "stat", "all", True).__anext__()
+            yield result
 
     @filter.command("bf_init")
     async def bf_init(self, event: AstrMessageEvent):

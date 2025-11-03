@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BF 战报 - THE BF TIMES</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Hiragino Sans GB', 'PingFang SC', 'Microsoft YaHei', 'Arial', 'sans-serif';
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9; /* 保持背景色，但会被图片覆盖 */
+            background-image: url({{bf6_background}}); /* 设置body的背景图片 */
+        }
+
+        .container {
+            max-width: 700px; /* 调整宽度，使其更窄 */
+            margin: 20px auto; /* 增加上下边距，模拟报纸留白 */
+            background-color: #fdf8ed;
+            /* 移除container的背景图片样式 */
+            padding: 30px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .newspaper-header {
+            text-align: center;
+            padding-bottom: 0;
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        .newspaper-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 4em;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            color: #222;
+            text-transform: uppercase;
+            line-height: 1;
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            letter-spacing: 0.05em;
+        }
+
+        .newspaper-title span {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .newspaper-title .large-initial {
+            font-size: 1.3em;
+            margin-right: -0.05em;
+        }
+
+        .newspaper-title .small-rest {
+            font-size: 0.9em;
+        }
+
+        .newspaper-title .word-separator {
+            width: 0.4em;
+        }
+
+        /* 顶部双线分隔 */
+        .header-section-divider-top {
+            border-top: 3px double #888;
+            margin: 15px 0 0 0;
+        }
+
+        .header-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+            color: #888;
+            padding: 5px 0;
+        }
+
+        /* 底部单线分隔 */
+        .header-section-divider-bottom {
+            border-bottom: 1px solid #ccc;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+
+        article {
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        article h2 {
+            font-family: 'Hiragino Sans GB', 'PingFang SC', 'Microsoft YaHei', 'Arial', 'sans-serif';
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 5px;
+            line-height: 1.2;
+            color: #222;
+        }
+
+        article .source {
+            font-size: 0.85em;
+            color: #888;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        article p {
+            font-size: 0.95em;
+            margin-top: 0;
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        article p.first-line-indent {
+            text-indent: 2em; /* 缩进两个字符 */
+        }
+
+        .full-width {
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 10px;
+        }
+
+        .full-width:last-of-type {
+            border-bottom: none;
+        }
+
+        /* Overall Section Styles */
+        .overall-section {
+            background-color: #fdf8ed; /* 与container背景色一致 */
+            color: #333; /* 与body文字颜色一致 */
+            border-radius: 0; /* 移除圆角 */
+            margin-bottom: 5px;
+            box-shadow: none; /* 移除阴影 */
+            border-top: 1px dashed #eee; /* 添加顶部虚线分隔 */
+            padding-top: 1px;
+        }
+
+        .overall-header {
+            display: flex;
+            align-items: baseline; /* 调整对齐方式 */
+            margin-bottom: 15px; /* 调整margin */
+            flex-wrap: wrap;
+        }
+
+        .overall-label {
+            background-color: transparent; /* 移除背景色 */
+            color: #222; /* 调整文字颜色 */
+            padding: 0;
+            border-radius: 0;
+            font-weight: bold;
+            margin-right: 10px; /* 调整margin */
+            text-transform: uppercase;
+            font-size: 1.2em; /* 调整字体大小 */
+            font-family: 'Playfair Display', serif; /* 使用报纸标题字体 */
+        }
+
+        .map-list {
+            font-size: 0.8em; /* 调整字体大小 */
+            color: #888; /* 调整文字颜色 */
+            flex-grow: 1;
+        }
+
+        .overall-stats {
+            display: flex;
+            justify-content: space-between; /* 调整为平均分布 */
+            flex-wrap: wrap;
+            gap: 10px; /* 统计项之间的间距 */
+            border-top: 1px solid #8B0000;
+            border-bottom: 1px solid #8B0000;
+            padding-top: 15px;
+            padding-bottom: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            min-width: unset; /* 移除最小宽度限制 */
+            flex: 1; /* 平均分配空间 */
+            padding: 0 5px; /* 调整padding */
+        }
+
+        .stat-value {
+            font-size: 1.4em; /* 调整字体大小 */
+            font-weight: bold;
+            color: #222; /* 调整文字颜色 */
+            margin-bottom: 3px; /* 调整margin */
+        }
+
+        .stat-label {
+            font-size: 0.7em; /* 调整字体大小 */
+            color: #666; /* 调整文字颜色 */
+            text-transform: uppercase;
+        }
+
+        /* Modes Section Styles */
+        .modes-section {
+            border-bottom: 1px solid #8B0000;
+            padding-top: 10px;
+        }
+
+        .modes-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #222;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .modes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0; /* 将下边距设置为0 */
+            font-size: 0.9em;
+            /* 移除表格整体边框 */
+        }
+
+        .modes-table th, .modes-table td {
+            padding: 4px 10px; /* 减小行距 */
+            text-align: center; /* 修改为居中 */
+            /* 移除单元格边框 */
+        }
+
+        /* 为表格行添加虚线分割 */
+        .modes-table tr {
+            border-bottom: 1px dashed #aaa; /* 加深虚线颜色 */
+        }
+
+        .modes-table tr:last-child {
+            border-bottom: none; /* 最后一行不显示虚线 */
+        }
+
+        /* 固定第一列宽度并居中 */
+        .modes-table th:first-child,
+        .modes-table td:first-child {
+            width: 180px;
+            text-align: center; /* 确保内容居中 */
+        }
+
+        .modes-table th {
+            background-color: rgba(128, 128, 128, 0.2); /* 调整背景色为灰色并设置透明度 */
+            font-weight: bold; /* 调整字体粗细为粗体 */
+            color: #333; /* 调整颜色为深色 */
+            text-transform: uppercase; /* 恢复为大写 */
+            font-size: 0.85em; /* 调整字体大小 */
+            /* 移除底部边框 */
+        }
+
+        /* 确保th内部的span也居中并填充宽度 */
+        .modes-table th:first-child span {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* 居中对齐 */
+            width: 100%;
+            padding: 4px 0; /* 减小行距 */
+        }
+
+        .modes-table td {
+            color: #444;
+        }
+
+        .modes-table .mode-name {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            text-align: center;
+            padding: 4px 0; /* 减小行距 */
+            width: 100%;
+        }
+
+        .modes-table .mode-icon {
+            max-width: 32px; /* 调整最大宽度 */
+            max-height: 32px; /* 调整最大高度 */
+            width: auto; /* 允许宽度自适应 */
+            height: auto; /* 允许高度自适应 */
+            object-fit: contain; /* 保持图片比例，在容器内完整显示 */
+            vertical-align: middle;
+            background-color: #333; /* 添加深色背景 */
+            padding: 4px; /* 增加内边距 */
+            border-radius: 4px; /* 添加圆角 */
+        }
+
+        .modes-table .kills-value {
+            font-weight: bold;
+            color: #d9534f; /* 红色 */
+        }
+
+        .modes-table .kpm-value {
+            font-size: 0.75em;
+            color: #888;
+            display: block;
+        }
+
+        /* 针对武器和载具图标的特定样式 */
+        .weapons-section .mode-icon {
+            max-width: 72px;
+            max-height: 72px;
+        }
+
+        .vehicles-section .mode-icon {
+            max-width: 48px;
+            max-height: 48px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="newspaper-header">
+        <h1 class="newspaper-title">
+                <span>
+                    <span class="large-initial">T</span><span class="small-rest">HE</span>
+                </span>
+            <span class="word-separator"></span>
+            <span class="large-initial">BF</span>
+            <span class="word-separator"></span>
+            <span>
+                    <span class="large-initial">T</span><span class="small-rest">IMES</span>
+                </span>
+        </h1>
+        <div class="header-section-divider-top"></div>
+        <div class="header-meta">
+            <span>{{matches_num}} Matches</span>
+            <span>{{win_num}} W - {{lost_num}} L</span>
+            <span>{{matches_timestamp}}</span>
+        </div>
+        <div class="header-section-divider-bottom"></div>
+    </header>
+
+    <main class="news-content">
+        <article class="full-width">
+            <h2>
+                {{llm_total[0]}}
+            </h2>
+            <p class="first-line-indent">
+                {{llm_total[1]}}
+            </p>
+        </article>
+
+        <div class="overall-section">
+            <div class="overall-header">
+                <span class="overall-label">OVERALL</span>
+                <span class="map-list">{{map_total}}</span>
+            </div>
+            <div class="overall-stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{stat_entity.player_kills}}</div>
+                    <div class="stat-label">击杀玩家</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{stat_entity.kills}}</div>
+                    <div class="stat-label">击杀</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{stat_entity.kill_death}}</div>
+                    <div class="stat-label">K/D</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{stat_entity.kills_per_minute}}</div>
+                    <div class="stat-label">KPM</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{stat_entity.score_per_minute}}</div>
+                    <div class="stat-label">SPM</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{stat_entity.deaths}}</div>
+                    <div class="stat-label">死亡</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{stat_entity.assists}}</div>
+                    <div class="stat-label">助攻</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{stat_entity.vehicles_destroyed}}</div>
+                    <div class="stat-label">载具破坏</div>
+                </div>
+            </div>
+        </div>
+
+        {% if mode_data %}
+        <div class="modes-section">
+            <div class="overall-header">
+                <span class="overall-label">MODES</span>
+                <span class="map-list">仅展示游玩最多的三个模式</span>
+            </div>
+            <table class="modes-table">
+                <thead>
+                <tr>
+                    <th><span>模式</span></th>
+                    <th>游玩时间</th>
+                    <th>击杀</th>
+                    <th>KPM</th>
+                    <th>助攻</th>
+                    <th>胜场</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for mode in mode_data %}
+                <tr>
+                    <td>
+                        <div class="mode-name">
+                            <img src="{{ mode.image }}"
+                                 alt="{{ mode.mode_name }} Icon" class="mode-icon">
+                            {{ mode.mode_name }}
+                        </div>
+                    </td>
+                    <td>{{ mode.time_played }} Min</td>
+                    <td>{{ mode.kills }}</td>
+                    <td>{{ mode.kills_per_minute }}</td>
+                    <td>{{ mode.assists }}</td>
+                    <td>{{ mode.matches_won }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% if mode_data %}
+        <div class="classes-section modes-section">
+            <div class="overall-header">
+                <span class="overall-label">CLASSES</span>
+                <span class="map-list">仅展示使用最多的两个兵种</span>
+            </div>
+            <table class="modes-table">
+                <thead>
+                <tr>
+                    <th><span>兵种</span></th>
+                    <th>游玩时间</th>
+                    <th>K/D</th>
+                    <th>击杀</th>
+                    <th>死亡</th>
+                    <th>助攻</th>
+                    <th>急救</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for soldier in soldier_data %}
+                <tr>
+                    <td>
+                        <div class="mode-name">
+                            <img src="{{soldier.image }}"
+                                 alt="{{soldier.soldier_name}}" class="mode-icon">
+                            {{soldier.soldier_name}}
+                        </div>
+                    </td>
+                    <td>{{soldier.time_played}} Min</td>
+                    <td>{{soldier.kd_ratio}}</td>
+                    <td>{{soldier.kills}}</td>
+                    <td>{{soldier.deaths}}</td>
+                    <td>{{soldier.assists}}</td>
+                    <td>{{soldier.revives}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% if weapon_data %}
+        <div class="weapons-section modes-section">
+            <div class="overall-header">
+                <span class="overall-label">WEAPONS</span>
+                <span class="map-list">仅展示使用最多的三把武器</span>
+            </div>
+            <table class="modes-table">
+                <thead>
+                <tr>
+                    <th><span>武器</span></th>
+                    <th>游玩时间</th>
+                    <th>击杀</th>
+                    <th>KPM</th>
+                    <th>伤害</th>
+                    <th>命中率</th>
+                    <th>爆头率</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for weapon in weapon_data %}
+                <tr>
+                    <td>
+                        <div class="mode-name">
+                            <img src="{{weapon.image}}"
+                                 alt="{{weapon.weapon_name }}" class="mode-icon">
+                            {{weapon.weapon_name }}
+                            <span class="kpm-value">{{weapon.category}}</span>
+                        </div>
+                    </td>
+                    <td>{{weapon.time_played}} Min</td>
+                    <td>{{weapon.kills }}</td>
+                    <td><span class="kills-value">{{weapon.kills_per_minute}}</span></td>
+                    <td>{{weapon.damage_dealt}}</td>
+                    <td>
+                        <span class="kills-value">{{weapon.shots_accuracy}}%</span>
+                        <span class="kpm-value">{{weapon.shots_fired}} 击发 // {{weapon.shots_hit}} 命中</span>
+                    </td>
+                    <td>{{weapon.headshot_percentage}}%</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% if vehicle_data %}
+        <div class="vehicles-section modes-section">
+            <div class="overall-header">
+                <span class="overall-label">VEHICLES</span>
+                <span class="map-list">仅展示使用最多的三辆载具</span>
+            </div>
+            <table class="modes-table">
+                <thead>
+                <tr>
+                    <th><span>载具</span></th>
+                    <th>游玩时间</th>
+                    <th>击杀</th>
+                    <th>KPM</th>
+                    <th>对敌伤害</th>
+                    <th>摧毁</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for vehicle in vehicle_data %}
+                <tr>
+                    <td>
+                        <div class="mode-name">
+                            <img src="{{vehicle.image }}"
+                                 alt="{{vehicle.vehicle_name }}" class="mode-icon">
+                            {{vehicle.vehicle_name }}
+                            <span class="kpm-value">{{vehicle.category }}</span>
+                        </div>
+                    </td>
+                    <td>{{vehicle.time_played }} Min</td>
+                    <td>{{vehicle.kills }}</td>
+                    <td><span class="kills-value">{{vehicle.kills_per_minute }}</span></td>
+                    <td>{{vehicle.damage_dealt }}</td>
+                    <td>{{vehicle.destroyed_with }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        <div style="text-align: center; color: #888; font-size: 0.8em; margin-top: 20px; padding-top: 10px;">
+            <div>powered by astrbot</div>
+            <div>生成时间：{{ update_time }}</div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

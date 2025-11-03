@@ -69,6 +69,6 @@ async def btr_main_llm_builder(stat_data: dict, weapons_data, vehicles_data, sol
             else:
                 llm_text += soldier.to_llm_text()
 
-    logger.info(llm_text)
+    logger.debug(llm_text)
 
     return llm_text

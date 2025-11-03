@@ -168,6 +168,45 @@ class PlayerStats:
 
         )
 
+    @classmethod
+    async def from_bf6_matches_dict(cls, data: Dict[str, Any],user_name):
+        return cls(
+            avatar=data.get("avatar", ""),
+            user_name=user_name,
+            level="",
+            rank_img="",
+            hours_played=str(round(data.get("timePlayed").get("value") / 60, 1)),
+
+            dmg_per_min=data.get("damagePerMinute").get("value"),
+            dmg_per_min_percentile=100,
+            kill_death=data.get("kdRatio").get("displayValue"),
+            kill_death_percentile=100,
+            headshot_percentage=data.get("headshotPercentage").get("value"),
+            kills_per_minute=data.get("killsPerMinute").get("value"),
+            kills_per_minute_percentile=100,
+            human_kd_ratio=data.get("playerKd").get("displayValue"),
+            human_kd_ratio_percentile=100,
+            kills=data.get("kills").get("value"),
+            kills_percentile=100,
+            player_kills=data.get("playerKills").get("value", 0),
+            player_kills_percentile=100,
+            assists=data.get("assists").get("value"),
+            deaths=data.get("deaths").get("value"),
+            kills_per_match=data.get("killsPerMatch").get("value"),
+            wl_percentage=data.get("wlPercentage").get("displayValue"),
+
+            wins=data.get("matchesWon").get("displayValue"),
+            wins_percentile=100,
+            losses=data.get("matchesLost").get("displayValue"),
+            damage_dealt=format_large_number(data.get("damageDealt").get("value")),
+            damage_per_match=data.get("damagePerMatch").get("value"),
+            revives=data.get("revives").get("value"),
+            vehicles_destroyed=data.get("vehiclesDestroyed").get("value"),
+            score_per_minute=data.get("scorePerMinute").get("value"),
+            score=format_large_number(data.get("score").get("value")),
+
+        )
+
     @staticmethod
     def get_rank_image(level):
         int_level = int(level)
@@ -196,8 +235,8 @@ class PlayerStats:
         """预处理 PlayerStats 方便 llm 理解"""
         return f"""用户{self.user_name}生涯总共击杀{self.kills}名敌军，总击杀世界排名{self.kills_percentile}%，击杀死亡比值(K/D):{self.kill_death},平均每分钟击杀(KPM):{self.kills_per_minute}，胜场:{self.wins}，急救了{self.revives}位士兵，爆头率：{self.headshot_percentage},总游玩时间，{self.hours_played}小时，破坏了{self.vehicles_destroyed}辆载具。"""
 
-    def __repr__(self):
-        return f"PlayerStats(user_name='{self.user_name}', rank={self.level}, ...)"
+    # def __repr__(self):
+    #     return f"PlayerStats(user_name='{self.user_name}', rank={self.level}, ...)"
 
 
 class Weapon:
@@ -291,6 +330,34 @@ class Weapon:
             time_played=str(round(data.get("stats").get("timePlayed").get("value", 0) / 3600, 1)),
             multi_kills=data.get("stats").get("multiKills").get("displayValue", "--"),
             body_kills=data.get("stats").get("bodyKills").get("displayValue", "--"),
+
+            deployments="",
+            dmg_per_min="",
+            scoped_kills="",
+            hipfire_kills="",
+        )
+    @classmethod
+    async def from_bf6_matches_dict(cls, data: Dict[str, Any]):
+        image_url = Weapon._get_category(data.get("metadata").get("imageUrl", ""))
+        image = ""
+        if image_url:
+            image = await get_image_base64(image_url)
+        return cls(
+            weapon_name=data.get("metadata").get("name", "--"),
+            category=Weapon._get_category(data.get("metadata").get("categoryName", "--")),
+            image_url=image_url,
+            image=image,
+            kills=data.get("stats").get("kills", 0),
+            kills_per_minute=data.get("stats").get("killsPerMinute", "--"),
+            shots_accuracy=data.get("stats").get("shotsAccuracy", "--"),
+            headshot_percentage=data.get("stats").get("headshotPercentage", "--"),
+            damage_dealt=data.get("stats").get("damageDealt", "--"),
+            shots_fired=data.get("stats").get("shotsFired", "--"),
+            shots_hit=data.get("stats").get("shotsHit", "--"),
+            headshot_kills=data.get("stats").get("headshotKills", "--"),
+            time_played=str(round(data.get("stats").get("timePlayed", 0) / 60, 1)),
+            multi_kills=data.get("stats").get("multiKills", "--"),
+            body_kills=data.get("stats").get("bodyKills", "--"),
 
             deployments="",
             dmg_per_min="",
@@ -420,6 +487,36 @@ class Vehicle:
             distance_traveled=data.get("stats").get("distanceTraveled").get("displayValue", "--"),
             call_ins=data.get("stats").get("callIns").get("displayValue", "--"),
             deployments=data.get("stats").get("deployments").get("displayValue", "--"),
+
+            dmg_per_min="",
+        )
+    @classmethod
+    async def from_bf6_matches_dict(cls, data: Dict[str, Any]):
+        image_url = data.get("metadata").get("imageUrl", "")
+        image = ""
+        if image_url:
+            image = await get_image_base64(image_url)
+        return cls(
+            vehicle_name=Vehicle._get_vehicle_category(data.get("metadata").get("name", "--")),
+            category=Vehicle._get_category(data.get("metadata").get("categoryName", "--")),
+            image_url=image_url,
+            image=image,
+            kills=data.get("stats").get("kills", 0),
+            kills_per_minute=data.get("stats").get("killsPerMinute", "--"),
+            time_played=str(round(data.get("stats").get("timePlayed", 0) / 60, 1)),
+            damage_dealt=data.get("stats").get("damageDealt", "--"),
+            damage_dealt_to=data.get("stats").get("damageDealtTo", "--"),
+
+            destroyed_with=data.get("stats").get("destroyedWith", "--"),
+            destroyed=data.get("stats").get("destroyedOfType", "--"),
+            passenger_assists=data.get("stats").get("passengerAssists", "--"),
+            driver_assists=data.get("stats").get("driverAssists", "--"),
+            road_kills=data.get("stats").get("roadKills", "--"),
+            assists=data.get("stats").get("assists", "--"),
+            multi_kills=data.get("stats").get("multiKills", "--"),
+            distance_traveled=data.get("stats").get("distanceTraveled", "--"),
+            call_ins=data.get("stats").get("callIns", "--"),
+            deployments=data.get("stats").get("deployments", "--"),
 
             dmg_per_min="",
         )
@@ -553,6 +650,27 @@ class Soldier:
             deaths=data.get("stats").get("deaths").get("displayValue", "--"),
         )
 
+    @classmethod
+    async def from_bf6_matches_dict(cls, data: Dict[str, Any]):
+        image_url = data.get("metadata").get("imageUrl", "")
+        image = ""
+        if image_url:
+            image = await get_image_base64(image_url)
+        return cls(
+            soldier_name=Soldier._get_category(data.get("metadata").get("name", "--")),
+            category="",
+            image_url=image_url,
+            image=image,
+            kills=data.get("stats").get("kills",0),
+            kd_ratio=data.get("stats").get("kdRatio","--"),
+            kills_per_minute=data.get("stats").get("killsPerMinute","--"),
+            assists=data.get("stats").get("assists", "--"),
+            time_played=str(round(data.get("stats").get("timePlayed", 0) / 60, 1)),
+            deployments=data.get("stats").get("deployments", "--"),
+            revives=data.get("stats").get("revives", "--"),
+            deaths=data.get("stats").get("deaths","--"),
+        )
+
     @staticmethod
     def _get_category(category_name):
         category_map = {
@@ -592,3 +710,132 @@ class Soldier:
 
     def __repr__(self):
         return f"Soldier(soldier_name='{self.soldier_name}', category='{self.category}', kills={self.kills})"
+
+
+class Modes:
+    """模式类"""
+
+    def __init__(self,
+                 mode_name: str,  # 模式名
+                 image_url: str,  # 图标url
+                 image: str,  # 图标base64s
+                 time_played: str,  # 使用时间
+                 kills: int,  # 击杀
+                 assists: int,  # 助攻
+                 deaths: int,  # 死亡
+                 matches_won: int,  # 胜利
+                 matches_lost: int,  # 失败
+                 matches_played: int,  # 总场次
+                 kills_per_minute: str,  # kp
+                 ):
+        self.mode_name = mode_name
+        self.image_url = image_url
+        self.image = image
+        self.time_played = time_played
+        self.kills = kills
+        self.assists = assists
+        self.deaths = deaths
+        self.matches_won = matches_won
+        self.matches_lost = matches_lost
+        self.matches_played = matches_played
+        self.kills_per_minute = kills_per_minute
+
+    @classmethod
+    async def from_bf6_matches_dict (cls, data: Dict[str, Any]):
+        image_url = data.get("metadata").get("imageUrl", "")
+        image = ""
+        if image_url:
+            image = await get_image_base64(image_url)
+
+        return cls(
+            mode_name=Modes._get_category(data.get("metadata").get("name", "--")),
+            image_url=image_url,
+            image=image,
+            time_played=str(round(data.get("stats").get("timePlayed", 0)/ 60, 1)),
+            kills=data.get("stats").get("kills", 0),
+            assists=data.get("stats").get("assists", 0),
+            deaths=data.get("stats").get("deaths", 0),
+            matches_won=data.get("stats").get("matchesWon", 0),
+            matches_lost=data.get("stats").get("matchesLost", 0),
+            matches_played=data.get("stats").get("matchesPlayed", 0),
+            kills_per_minute=data.get("stats").get("killsPerMinute", "--"),
+        )
+
+    @staticmethod
+    def _get_category(category_name):
+        category_map = {
+            "Strikepoint": "打击点",
+            "Conquest": "征服",
+            "Breakthrough": "突破",
+            "Rush": "突袭",
+            "Escalation": "全面升级",
+            "Domination": "抢攻",
+            "Team Deathmatch": "团队死斗",
+            "BR Duos": "双人大逃杀",
+            "Gauntlet": "试炼场",
+            "Squad Deathmatch": "小队死斗",
+            "King of the Hill": "山丘之王",
+            "Payload": "Payload",
+            "BR Quads": "四人大逃杀",
+        }
+        return category_map.get(category_name, category_name)
+    def __repr__(self):
+        return f"Modes(mode_name='{self.mode_name}', matches_won='{self.matches_won}', matches_lost={self.matches_lost},matches_played={self.matches_played})"
+
+class Maps:
+    """地图类"""
+    def __init__(self,
+                 map_name: str,
+                 image_url: str,
+                 image: str,
+                 time_played: str,
+                 matches_played: str,
+                 matches_won: str,
+                 matches_lost: str,
+                 wl_percentage: str,
+                 ):
+        self.map_name = map_name
+        self.image_url = image_url
+        self.image = image
+        self.time_played = time_played
+        self.matches_played = matches_played
+        self.matches_won = matches_won
+        self.matches_lost = matches_lost
+        self.wl_percentage = wl_percentage
+
+    @classmethod
+    async def from_bf6_matches_dict (cls, data: Dict[str, Any]):
+        image_url = data.get("metadata").get("imageUrl", "")
+        image = ""
+        if image_url:
+            image = await get_image_base64(image_url)
+
+        return cls(
+            map_name=Maps._get_category(data.get("metadata").get("name", "--")),
+            image_url=image_url,
+            image=image,
+            time_played=str(round(data.get("stats").get("timePlayed", 0)/ 60, 1)),
+            matches_played=data.get("stats").get("matchesPlayed", 0),
+            matches_won=data.get("stats").get("matchesWon", 0),
+            matches_lost=data.get("stats").get("matchesLost", 0),
+            wl_percentage=data.get("stats").get("wlPercentage", "--"),
+        )
+
+    @staticmethod
+    def _get_category(map_name):
+        category_map = {
+            "Operation Firestorm": "火线风暴",
+            "Mirak Valley": "米拉克山谷",
+            "Iberian Offensive": "伊比利亚攻势",
+            "Liberation Peak": "解放峰",
+            "Saints Quarter": "圣徒区",
+            "Empire State": "帝国大厦",
+            "Siege of Cairo": "开罗围城",
+            "Manhattan Bridge": "曼哈顿大桥",
+            "New Sobek City": "新索贝克城",
+            "Blackwell Fields": "布莱克威尔田野",
+        }
+        return category_map.get(map_name, map_name)
+
+    def __repr__(self):
+        return f"Maps(map_name='{self.map_name}', matches_won='{self.matches_won}', matches_lost={self.matches_lost})"

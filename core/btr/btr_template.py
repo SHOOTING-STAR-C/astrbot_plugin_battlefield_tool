@@ -1,6 +1,7 @@
 from astrbot.api import logger
 from ...constants.battlefield_constants import (ImageUrls, BackgroundColors, GameMappings, TemplateConstants)
-from ...models.btr_entities import PlayerStats, Weapon, Vehicle, Soldier
+from ...models.btr_entities import PlayerStats, Weapon, Vehicle, Soldier, Modes, Maps
+from ..image_util import get_image_base64
 
 import time
 
@@ -10,10 +11,12 @@ MAIN_TEMPLATE = templates["btr_main"]
 WEAPONS_TEMPLATE = templates["btr_weapons"]
 VEHICLES_TEMPLATE = templates["btr_vehicles"]
 SOLDIERS_TEMPLATE = templates["btr_soldiers"]
+MATCHES_TEMPLATE = templates["btr_matches"]
 
 
 def sort_list_of_dicts(list_of_dicts, key):
     """降序排序，支持点分隔的嵌套键，如果值为零就删除该项"""
+
     def get_nested_value(d, k_path):
         keys = k_path.split('.')
         current_value = d
@@ -27,7 +30,7 @@ def sort_list_of_dicts(list_of_dicts, key):
 
     # 先过滤掉值为零的项
     filtered_list = [d for d in list_of_dicts if get_nested_value(d, key) != 0]
-    
+
     # 然后对过滤后的列表进行降序排序
     return sorted(filtered_list, key=lambda k: get_nested_value(k, key), reverse=True)
 
@@ -83,7 +86,7 @@ async def btr_main_html_builder(stat_data: dict, weapons_data, vehicles_data, so
     return html
 
 
-async def btr_weapons_html_builder(stat_data: dict, weapons_data,vehicles_data, soldier_data, game: str) -> str:
+async def btr_weapons_html_builder(stat_data: dict, weapons_data, vehicles_data, soldier_data, game: str) -> str:
     """
         构建武器html
         Args:
@@ -95,7 +98,7 @@ async def btr_weapons_html_builder(stat_data: dict, weapons_data,vehicles_data, 
         Returns:
             构建的Html
     """
-    #排序
+    # 排序
     weapons_data = sort_list_of_dicts(weapons_data, "stats.kills.value")
     soldier_data = sort_list_of_dicts(soldier_data, "stats.kills.value")
     background_color = GameMappings.BACKGROUND_COLORS.get(game, BackgroundColors.BF2042_BACKGROUND_COLOR)
@@ -128,7 +131,7 @@ async def btr_weapons_html_builder(stat_data: dict, weapons_data,vehicles_data, 
     return html
 
 
-async def btr_vehicles_html_builder(stat_data: dict,weapons_data, vehicles_data,soldier_data, game: str) -> str:
+async def btr_vehicles_html_builder(stat_data: dict, weapons_data, vehicles_data, soldier_data, game: str) -> str:
     """
         构建载具html
         Args:
@@ -173,7 +176,7 @@ async def btr_vehicles_html_builder(stat_data: dict,weapons_data, vehicles_data,
     return html
 
 
-async def btr_soldier_html_builder(stat_data: dict,weapons_data, vehicles_data, soldier_data, game: str) -> str:
+async def btr_soldier_html_builder(stat_data: dict, weapons_data, vehicles_data, soldier_data, game: str) -> str:
     """
         构建士兵html
         Args:
@@ -211,3 +214,118 @@ async def btr_soldier_html_builder(stat_data: dict,weapons_data, vehicles_data, 
         background_color=background_color,
     )
     return html
+
+
+async def btr_matches_html_builder(ea_name: str, stat_data: dict, weapons_data, vehicles_data, soldier_data, mode_data,
+                                   maps_data, game: str, matches_timestamp, provider) -> str:
+    """
+        构建战报html
+        Args:
+            ea_name: ea_name
+            stat_data: 查询到的统计数据字典
+            weapons_data: 查询到的武器数据字典
+            vehicles_data: 查询到的载具数据字典
+            soldier_data: 查询到的士兵数据字典
+            mode_data: 查询到的模式数据字典
+            maps_data: 查询到的地图数据字典
+            game: 所查询的游戏
+            matches_timestamp: 战报时间
+            provider: LLM供应商实例
+        Returns:
+            构建的Html
+    """
+    update_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    bf6_background = await get_image_base64(ImageUrls.BF6_BACKGROUND)
+
+    weapons_data = sort_list_of_dicts(weapons_data, "stats.kills")
+    vehicles_data = sort_list_of_dicts(vehicles_data, "stats.kills")
+    soldier_data = sort_list_of_dicts(soldier_data, "stats.kills")
+    mode_data = sort_list_of_dicts(mode_data, "stats.kills")
+    maps_data = sort_list_of_dicts(maps_data, "stats.matchesPlayed")
+
+    stat_entity = await PlayerStats.from_bf6_matches_dict(stat_data, ea_name)
+
+    # 循环创建武器、载具、士兵对象列表
+    weapons_entities = [await Weapon.from_bf6_matches_dict(weapon_dict) for weapon_dict in weapons_data]
+    vehicles_entities = [await Vehicle.from_bf6_matches_dict(vehicle_dict) for vehicle_dict in vehicles_data]
+    soldiers_entities = [await Soldier.from_bf6_matches_dict(soldier_dict) for soldier_dict in soldier_data]
+    modes_entities = [await Modes.from_bf6_matches_dict(mode_dict) for mode_dict in mode_data]
+    maps_entities = [await Maps.from_bf6_matches_dict(maps_dict) for maps_dict in maps_data]
+
+    # 计算最近地图胜场
+    map_total = " // ".join(
+        [f"{map_entity.map_name} {map_entity.matches_won} W-{map_entity.matches_lost} L" for map_entity in
+         maps_entities])
+
+    win_num = 0
+    lost_num = 0
+    matches_num = 0
+    # 计算最近模式胜场
+    for mode_entity in modes_entities:
+        win_num += mode_entity.matches_won
+        lost_num += mode_entity.matches_lost
+        matches_num += mode_entity.matches_played
+
+    prompt = build_prompt(stat_entity, weapons_entities, vehicles_entities, soldiers_entities, modes_entities, maps_entities, map_total)
+    llm_resp = await provider.text_chat(prompt=prompt)
+
+    resp_arr = ["",""]
+    if llm_resp and llm_resp.completion_text:
+        resp_arr = llm_resp.completion_text.strip().split("&&&")
+
+    html = MATCHES_TEMPLATE.render(
+        bf6_background=bf6_background,
+        update_time=update_time,
+        stat_entity=stat_entity,
+        weapon_data=weapons_entities[:3],
+        vehicle_data=vehicles_entities[:3],
+        soldier_data=soldiers_entities[:2],
+        mode_data=modes_entities[:3],
+        maps_entities=maps_entities,
+        map_total=map_total,
+        win_num=win_num,
+        lost_num=lost_num,
+        matches_num=matches_num,
+        matches_timestamp=matches_timestamp,
+        game=game,
+        llm_total=resp_arr,
+    )
+    return html
+
+
+def build_prompt(stat_entity, weapons_data, vehicles_data, soldier_data, mode_data, maps_data, map_total):
+    """构建提示词prompt"""
+    base_prompt = "你是一个战地风云游戏前线记者，根据以下游戏数据生成一个标题和内容，要足够炸裂并吸引眼球，评判标准kd<2是薯条,kpm<1是薯条，可以适当调侃薯条，格式要求标题和内容要用'&&&'分开，字数不超过800个字"
+
+    recent_prompt = base_prompt + f"玩家{stat_entity.user_name}（名字发给你什么样，你就写什么样子，禁止翻译）"
+
+
+    if map_total:
+        recent_prompt = f"{recent_prompt}最近游玩地图{map_total}"
+
+    recent_prompt = f"{recent_prompt},击杀{stat_entity.kills}名敌军，其中{stat_entity.player_kills}名敌方玩家，平均每分钟击杀{stat_entity.kills_per_minute}，K/D{stat_entity.kill_death}，死亡{stat_entity.deaths}，助攻{stat_entity.assists}，破坏了{stat_entity.vehicles_destroyed}辆载具"
+
+    mode_prompt = "游玩模式"
+    if mode_data:
+        for mode_entity in mode_data:
+            mode_prompt += f"{mode_entity.mode_name}，胜利{mode_entity.matches_won}，失败{mode_entity.matches_lost}"
+        recent_prompt += mode_prompt
+
+    soldier_prompt = ""
+    if soldier_data:
+        for soldier_entity in soldier_data:
+            soldier_prompt += f"使用{soldier_entity.soldier_name}兵，击杀了{soldier_entity.kills}敌军，K/D{soldier_entity.kd_ratio}，死亡{soldier_entity.deaths}次，助攻{soldier_entity.assists}，救助了{soldier_entity.revives}名队友"
+        recent_prompt += soldier_prompt
+    weapons_prompt = ""
+    if weapons_data:
+        for weapon_entity in weapons_data:
+            weapons_prompt += f"使用{weapon_entity.category}{weapon_entity.weapon_name}击杀了{weapon_entity.kills}名敌军,每分钟平均击杀{weapon_entity.kills_per_minute},造成了{weapon_entity.damage_dealt}点伤害，爆头率{weapon_entity.headshot_percentage}"
+        recent_prompt += weapons_prompt
+
+    vehicles_prompt = ""
+    if vehicles_data:
+        for vehicle_entity in vehicles_data:
+            vehicles_prompt += f"使用{vehicle_entity.category}{vehicle_entity.vehicle_name}击杀了{vehicle_entity.kills},每分钟平均击杀{vehicle_entity.kills_per_minute}，造成了{vehicle_entity.damage_dealt}点伤害，摧毁了{vehicle_entity.destroyed_with}辆载具"
+        recent_prompt += vehicles_prompt
+
+    return recent_prompt
