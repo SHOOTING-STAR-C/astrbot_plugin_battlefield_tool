@@ -829,11 +829,11 @@ class Maps:
             "Iberian Offensive": "伊比利亚攻势",
             "Liberation Peak": "解放峰",
             "Saints Quarter": "圣徒区",
-            "Empire State": "帝国大厦",
+            "Empire State": "帝国之洲",
             "Siege of Cairo": "开罗围城",
             "Manhattan Bridge": "曼哈顿大桥",
             "New Sobek City": "新索贝克城",
-            "Blackwell Fields": "布莱克威尔田野",
+            "Blackwell Fields": "布莱克威尔原野",
         }
         return category_map.get(map_name, map_name)
 

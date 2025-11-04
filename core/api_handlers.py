@@ -163,7 +163,13 @@ class ApiHandlers:
             result = await self.plugin_logic.handle_btr_matches_response("bf6",request_data.ea_name, self.html_render, stats_data,
                                                                          weapon_data, vehicle_data, soldier_data,
                                                                          mode_data, maps_data,matches_timestamp,provider).__anext__()
-            yield result
+            next_page = ""
+            if request_data.page < 25:
+                if request_data.pider:
+                    next_page = f"战报 {request_data.ea_name},game=bf6,pider={request_data.pider},page={request_data.page + 1}"
+                else:
+                    next_page = f"战报 {request_data.ea_name},game=bf6,page={request_data.page + 1}"
+            yield result,next_page
 
     async def fetch_gt_servers_data(self, request_data: PlayerDataRequest, timeout_config: int, session):
         """

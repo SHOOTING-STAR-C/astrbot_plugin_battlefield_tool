@@ -150,8 +150,14 @@ class BattlefieldTool(Star):
             return
         logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
 
-        result = await self.api_handlers.handle_btr_matches(event, request_data,provider).__anext__()
+        result,next_page = await self.api_handlers.handle_btr_matches(event, request_data,provider).__anext__()
         yield event.image_result(result)
+        if next_page:
+            prefix = ""
+            if len(self.wake_prefix) > 0:
+                prefix = self.wake_prefix[0]
+            yield event.plain_result("下一页")
+            yield event.plain_result(f"{prefix}{next_page}")
 
     @filter.command("servers", alias=["服务器"])
     async def bf_servers(self, event: AstrMessageEvent):
