@@ -1,6 +1,8 @@
-# astrbot_plugin_battlefield_tool
+<div align="center">
+  <img src="logo.png" alt="logo">
+</div>
 
-# ✨Astrbot 战地风云战绩查询插件
+# ✨Astrbot 战地风云战绩查询插件 (astrbot_plugin_battlefield_tool)
 
 [![License](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
