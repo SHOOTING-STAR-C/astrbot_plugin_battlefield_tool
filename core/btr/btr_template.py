@@ -239,8 +239,8 @@ async def btr_matches_html_builder(ea_name: str, stat_data: dict, weapons_data, 
 
     weapons_data = sort_list_of_dicts(weapons_data, "stats.kills")
     vehicles_data = sort_list_of_dicts(vehicles_data, "stats.kills")
-    soldier_data = sort_list_of_dicts(soldier_data, "stats.kills")
-    mode_data = sort_list_of_dicts(mode_data, "stats.kills")
+    soldier_data = sort_list_of_dicts(soldier_data, "stats.timePlayed")
+    mode_data = sort_list_of_dicts(mode_data, "stats.matchesPlayed")
     maps_data = sort_list_of_dicts(maps_data, "stats.matchesPlayed")
 
     stat_entity = await PlayerStats.from_bf6_matches_dict(stat_data, ea_name)
