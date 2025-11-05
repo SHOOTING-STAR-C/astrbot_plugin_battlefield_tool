@@ -8,7 +8,7 @@
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 [![AstrBot](https://img.shields.io/badge/AstrBot-3.4%2B-orange.svg)](https://github.com/Soulter/AstrBot)
 
-一个基于 Astrbot 的战地系列游戏(BF1/BF4/BF5/BF2042/BF6)战绩统计查询插件，支持：
+一个基于 Astrbot 的战地系列游戏(BF4/BF1/BF5/BF2042/BF6)战绩统计查询插件，支持：
 
 - 玩家战绩查询
 - 武器/载具/士兵/战报（最近）统计
