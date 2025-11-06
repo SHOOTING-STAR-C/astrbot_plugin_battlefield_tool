@@ -156,7 +156,7 @@ class BattlefieldTool(Star):
             prefix = ""
             if len(self.wake_prefix) > 0:
                 prefix = self.wake_prefix[0]
-            yield event.plain_result("可以使用下面的命令翻页")
+            yield event.plain_result("可以用下面的指令翻页")
             yield event.plain_result(f"{prefix}{next_page}")
 
     @filter.command("servers", alias=["服务器"])
