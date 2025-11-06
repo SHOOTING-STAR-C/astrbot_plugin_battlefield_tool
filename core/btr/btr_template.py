@@ -295,7 +295,7 @@ async def btr_matches_html_builder(ea_name: str, stat_data: dict, weapons_data, 
 
 def build_prompt(stat_entity, weapons_data, vehicles_data, soldier_data, mode_data, maps_data, map_total):
     """构建提示词prompt"""
-    base_prompt = "你是一个战地风云游戏前线记者，根据以下游戏数据生成一个标题和内容，要足够炸裂并吸引眼球，评判标准kd<2是薯条,kpm<1是薯条，可以适当调侃薯条，格式要求标题和内容要用'&&&'分开，字数不超过800个字"
+    base_prompt = "你是一个战地风云游戏前线记者，根据以下游戏数据生成一个标题和内容，要足够炸裂并吸引眼球，评判标准kd<2是薯条,kpm<1是薯条，可以适当调侃薯条，格式要求标题和内容要用'&&&'分开，总字数不超过800个字，注意回复要用纯文本"
 
     recent_prompt = base_prompt + f"玩家{stat_entity.user_name}（名字发给你什么样，你就写什么样子，禁止翻译）"
 
