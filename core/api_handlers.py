@@ -95,6 +95,9 @@ class ApiHandlers:
                     yield "查询到多个用户：\n" + "\n".join(
                         user_info_list) + "\n请先使用 stat pider=pider 查询各个战绩确认哪个是您，然后使用bind pider=pider绑定您的pid"
                     return
+                elif isinstance(data,str) and "私有的" in data:
+                    yield data
+                    return
                 else:
                     result_data = data.get("segments")
                     for result in result_data:
@@ -127,8 +130,10 @@ class ApiHandlers:
                                                              vehicle_data, soldier_data, is_llm).__anext__()
         yield result
 
-    async def handle_btr_matches(self, event: AstrMessageEvent, request_data: PlayerDataRequest,provider, is_llm: bool = False):
+    async def handle_btr_matches(self, event: AstrMessageEvent, request_data: PlayerDataRequest, provider,
+                                 is_llm: bool = False):
         """查询bf6的最近战局统计数据"""
+        next_page = ""
         data_iterator = self._fetch_btr_data(event, request_data, "bf6_stat")
         data = await data_iterator.__anext__()
         if isinstance(data, list):
@@ -138,7 +143,10 @@ class ApiHandlers:
                 identifier = user.get("platformUserIdentifier", "未知")
                 user_info_list.append(f"用户名: {handle}, platformUserIdentifier: {identifier}")
             yield "查询到多个用户：\n" + "\n".join(
-                user_info_list) + "\n请先使用 stat pider=pider 查询各个战绩确认哪个是您，然后使用bind pider=pider绑定您的pid"
+                user_info_list) + "\n请先使用 stat pider=pider 查询各个战绩确认哪个是您，然后使用bind pider=pider绑定您的pid",next_page
+            return
+        elif isinstance(data,str) and "私有的" in data:
+            yield data,next_page
             return
         else:
             update_hash = data.get("metadata").get("updateHash")
@@ -148,28 +156,31 @@ class ApiHandlers:
             else:
                 page = 0
 
-            if len(matches_data.get("matches")) < page:
-                yield "暂无数据"
+            if len(matches_data.get("matches")) < request_data.page:
+                yield "暂无数据",next_page
                 return
 
             stats_data = matches_data.get("matches")[page].get("segments")[0].get("stats")
-            matches_timestamp = format_datetime_string(matches_data.get("matches")[page].get("metadata").get("timestamp"))
+            matches_timestamp = format_datetime_string(
+                matches_data.get("matches")[page].get("metadata").get("timestamp"))
             weapon_data = matches_data.get("matches")[page].get("segments")[0].get("metadata").get("weapons")
             vehicle_data = matches_data.get("matches")[page].get("segments")[0].get("metadata").get("vehicles")
             soldier_data = matches_data.get("matches")[page].get("segments")[0].get("metadata").get("kits")
             mode_data = matches_data.get("matches")[page].get("segments")[0].get("metadata").get("gamemodes")
             maps_data = matches_data.get("matches")[page].get("segments")[0].get("metadata").get("levels")
 
-            result = await self.plugin_logic.handle_btr_matches_response("bf6",request_data.ea_name, self.html_render, stats_data,
+            result = await self.plugin_logic.handle_btr_matches_response("bf6", request_data.ea_name, self.html_render,
+                                                                         stats_data,
                                                                          weapon_data, vehicle_data, soldier_data,
-                                                                         mode_data, maps_data,matches_timestamp,provider).__anext__()
-            next_page = ""
-            if request_data.page < 25:
+                                                                         mode_data, maps_data, matches_timestamp,
+                                                                         provider).__anext__()
+
+            if request_data.page < 25 and request_data.page <= len(matches_data.get("matches")):
                 if request_data.pider:
                     next_page = f"战报 {request_data.ea_name},game=bf6,pider={request_data.pider},page={request_data.page + 1}"
                 else:
                     next_page = f"战报 {request_data.ea_name},game=bf6,page={request_data.page + 1}"
-            yield result,next_page
+            yield result, next_page
 
     async def fetch_gt_servers_data(self, request_data: PlayerDataRequest, timeout_config: int, session):
         """
