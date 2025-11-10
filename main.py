@@ -59,7 +59,7 @@ class BattlefieldTool(Star):
         if request_data.error_msg:
             yield event.plain_result(request_data.error_msg)
             return
-        logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
+        logger.info(f"玩家id:{request_data.ea_name}，查询游戏:{request_data.game}")
 
         if request_data.game in ["bf2042", "bf6"]:
             result = await self.api_handlers.handle_btr_game(event, request_data, "stat").__anext__()
@@ -69,7 +69,10 @@ class BattlefieldTool(Star):
                 yield event.image_result(result)
         else:
             result = await self.api_handlers.fetch_gt_data(event, request_data, "stat", "all").__anext__()
-            yield event.image_result(result)
+            if not "http" in result:
+                yield event.plain_result(result)
+            else:
+                yield event.image_result(result)
 
     @filter.command("weapons", alias=["武器"])
     async def bf_weapons(self, event: AstrMessageEvent):
@@ -80,14 +83,17 @@ class BattlefieldTool(Star):
             yield event.plain_result(request_data.error_msg)
             return
 
-        logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
+        logger.info(f"玩家id:{request_data.ea_name}，查询游戏:{request_data.game}")
 
         if request_data.game in ["bf2042", "bf6"]:
             result = await self.api_handlers.handle_btr_game(event, request_data, "weapons").__anext__()
             yield event.image_result(result)
         else:
             result = await self.api_handlers.fetch_gt_data(event, request_data, "weapons", "weapons").__anext__()
-            yield event.image_result(result)
+            if not "http" in result:
+                yield event.plain_result(result)
+            else:
+                yield event.image_result(result)
 
     @filter.command("vehicles", alias=["载具"])
     async def bf_vehicles(self, event: AstrMessageEvent):
@@ -98,13 +104,16 @@ class BattlefieldTool(Star):
             yield event.plain_result(request_data.error_msg)
             return
 
-        logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
+        logger.info(f"玩家id:{request_data.ea_name}，查询游戏:{request_data.game}")
         if request_data.game in ["bf2042", "bf6"]:
             result = await self.api_handlers.handle_btr_game(event, request_data, "vehicles").__anext__()
             yield event.image_result(result)
         else:
             result = await self.api_handlers.fetch_gt_data(event, request_data, "vehicles", "vehicles").__anext__()
-            yield event.image_result(result)
+            if not "http" in result:
+                yield event.plain_result(result)
+            else:
+                yield event.image_result(result)
 
     @filter.command("soldiers", alias=["士兵"])
     async def bf_soldier(self, event: AstrMessageEvent):
@@ -119,9 +128,12 @@ class BattlefieldTool(Star):
             yield event.plain_result("士兵查询仅支持战地2042、bf6。")
             return
 
-        logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
+        logger.info(f"玩家id:{request_data.ea_name}，查询游戏:{request_data.game}")
         result = await self.api_handlers.handle_btr_game(event, request_data, "soldiers").__anext__()
-        yield event.image_result(result)
+        if not "http" in result:
+            yield event.plain_result(result)
+        else:
+            yield event.image_result(result)
 
     @filter.command("recent", alias=["最近", "战报"])
     async def bf_recent(self, event: AstrMessageEvent):
@@ -139,7 +151,6 @@ class BattlefieldTool(Star):
             yield error_msg
             return
 
-
         request_data = await self.plugin_logic.handle_player_data_request(event, ["recent", "最近", "战报"])
         if request_data.error_msg:
             yield event.plain_result(request_data.error_msg)
@@ -148,16 +159,19 @@ class BattlefieldTool(Star):
         if request_data.game != "bf6":
             yield event.plain_result("最近战局查询仅支持战地bf6。")
             return
-        logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
+        logger.info(f"玩家id:{request_data.ea_name}，查询游戏:{request_data.game}")
 
-        result,next_page = await self.api_handlers.handle_btr_matches(event, request_data,provider).__anext__()
-        yield event.image_result(result)
-        if next_page:
-            prefix = ""
-            if len(self.wake_prefix) > 0:
-                prefix = self.wake_prefix[0]
-            yield event.plain_result("可以用下面的指令翻页")
-            yield event.plain_result(f"{prefix}{next_page}")
+        result, next_page = await self.api_handlers.handle_btr_matches(event, request_data, provider).__anext__()
+        if not "http" in result:
+            yield event.plain_result(result)
+        else:
+            yield event.image_result(result)
+            if next_page:
+                prefix = ""
+                if len(self.wake_prefix) > 0:
+                    prefix = self.wake_prefix[0]
+                yield event.plain_result("可以用下面的指令翻页")
+                yield event.plain_result(f"{prefix}{next_page}")
 
     @filter.command("servers", alias=["服务器"])
     async def bf_servers(self, event: AstrMessageEvent):
@@ -176,7 +190,7 @@ class BattlefieldTool(Star):
             yield event.plain_result("请提供服务器名称进行查询哦~")  # 优化提示信息
             return
 
-        logger.info(f"查询服务器:{request_data.server_name}，所查询游戏:{request_data.game}")
+        logger.info(f"查询服务器:{request_data.server_name}，查询游戏:{request_data.game}")
         servers_data = await self.api_handlers.fetch_gt_servers_data(
             request_data, self.timeout_config, self._session
         )
@@ -184,7 +198,10 @@ class BattlefieldTool(Star):
         result = await self.plugin_logic.process_api_response(
             event, servers_data, "servers", request_data.game, self.html_render
         ).__anext__()
-        yield result
+        if not "http" in result:
+            yield event.plain_result(result)
+        else:
+            yield event.image_result(result)
 
     @filter.command("bind", alias=["绑定"])
     async def bf_bind(self, event: AstrMessageEvent):
@@ -224,7 +241,7 @@ class BattlefieldTool(Star):
         if request_data.error_msg:
             yield request_data.error_msg
             return
-        logger.info(f"玩家id:{request_data.ea_name}，所查询游戏:{request_data.game}")
+        logger.info(f"玩家id:{request_data.ea_name}，查询游戏:{request_data.game}")
         if request_data.game in ["bf2042", "bf6"]:
             result = await self.api_handlers.handle_btr_game(event, request_data, "stat", True).__anext__()
             yield result
@@ -273,8 +290,8 @@ class BattlefieldTool(Star):
 
         help_msg = f"""战地风云插件使用帮助：
 1. 账号绑定
-命令: {prefix}bind [ea_name] 或 {prefix}绑定 [ea_name]
-参数: ea_name - 您的EA账号名
+命令: {prefix}bind [name] 或 {prefix}绑定 [name]
+参数: name - bf4、bf1、bfv、bf2042您的EA账号名，bf6在steam购买的就是steam名称
 示例: {prefix}bind ExamplePlayer
 
 2. 默认查询设置
@@ -283,28 +300,35 @@ class BattlefieldTool(Star):
 注意: 私聊都能使用，群聊中仅bot管理员可用
 
 3. 战绩查询
-命令: {prefix}stat [ea_name],game=[游戏代号]
+命令: {prefix}stat [name],game=[游戏代号]
 参数:
-  ea_name - EA账号名(可选，已绑定则可不填)
+  name - EA账号名(可选，已绑定则可不填)
   game - 游戏代号(可选)
 示例: {prefix}stat ExamplePlayer,game=bf1
 
 4. 武器统计
-命令: {prefix}weapons [ea_name],game=[游戏代号] 或 {prefix}武器 [ea_name],game=[游戏代号]
+命令: {prefix}weapons [name],game=[游戏代号] 或 {prefix}武器 [name],game=[游戏代号]
 参数同上
 示例: {prefix}weapons ExamplePlayer,game=bfv
 
 5. 载具统计
-命令: {prefix}vehicles [ea_name],game=[游戏代号] 或 {prefix}载具 [ea_name],game=[游戏代号]
+命令: {prefix}vehicles [name],game=[游戏代号] 或 {prefix}载具 [name],game=[游戏代号]
 参数同上
 示例: {prefix}vehicles ExamplePlayer
 
 6. 士兵查询
-命令: {prefix}soldier [ea_name],game=bf2042 或 {prefix}士兵 [ea_name],game=bf2042
+命令: {prefix}soldier [name],game=bf2042 或 {prefix}士兵 [name],game=bf2042
 参数:
-  ea_name - EA账号名(可选，已绑定则可不填)
-  game - 游戏代号(必填，且必须为bf2042、bf6)
+  name - EA账号名(可选，已绑定则可不填)
+  game - 游戏代号(必须为bf2042、bf6)
 示例: {prefix}soldier ExamplePlayer,game=bf2042
+
+6. 战报查询
+命令: {prefix}recent [name],game=bf6 或 {prefix}战报 [name],game=bf6
+参数:
+  name - EA账号名(可选，已绑定则可不填)
+  game - 游戏代号(必须为bf6)
+示例: {prefix}战报 ExamplePlayer,game=bf6
 
 7. 服务器查询
 命令: {prefix}servers [server_name],game=[游戏代号] 或 {prefix}服务器 [server_name],game=[游戏代号]
