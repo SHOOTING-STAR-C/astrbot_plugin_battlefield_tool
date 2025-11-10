@@ -172,10 +172,7 @@ class BattlefieldPluginLogic:
 
             generator_func, html_builder_func = handler_map[data_type]
             pic_url = await generator_func(api_data, game, html_render_func, html_builder_func)
-            if isinstance(pic_url, str) and "http" in pic_url:
-                yield event.plain_result(pic_url)
-            else:
-                yield pic_url
+            yield pic_url
 
     async def handle_player_data_request(
             self, event: AstrMessageEvent, str_to_remove_list: list
@@ -201,8 +198,8 @@ class BattlefieldPluginLogic:
 
         try:
             # 解析命令
-            ea_name, game, pider, page = await self._parse_input_regex(
-                str_to_remove_list, self.STAT_PATTERN, message_str
+            ea_name, game, pider, page = await self._parse_input_string(
+                str_to_remove_list, message_str
             )
             # 由于共用解析方法所以这里赋个值
             if str_to_remove_list == ["servers", "服务器"]:
@@ -224,6 +221,10 @@ class BattlefieldPluginLogic:
             # 战地1使用繁中
             if game == "bf1":
                 lang = self.LANG_TW
+
+            if page > 25:
+                error_msg = "只能查询25页"
+
         except Exception as e:
             error_msg = str(e)
 
@@ -279,34 +280,41 @@ class BattlefieldPluginLogic:
         )
 
     @staticmethod
-    async def _parse_input_regex(
+    async def _parse_input_string(
             str_to_remove_list: list[str],
-            pattern: Union[Pattern[str], None],
             base_string: str,
     ):
-        """私有方法：从base_string中移除str_to_remove_list并去空格，然后根据正则取出参数
+        """私有方法：从base_string中移除str_to_remove_list并去空格，然后根据关键字取出参数
         Args:
             str_to_remove_list: 需要移除的子串list
             base_string: 原始字符串
         Returns:
-            处理后的字符串
+            tuple: (ea_name, game, pider, page)
         """
         # 移除目标子串和空格
         for str_to_remove in str_to_remove_list:
             base_string = base_string.replace(str_to_remove, "")
-        clean_str = base_string.replace(" ", "")
-        # 用正则提取输入的参数
-        if pattern is not None:
-            match = pattern.match(clean_str.strip())
-            if not match:
-                raise ValueError("格式错误，正确格式：[用户名][,game=游戏名]")
-            ea_name = match.group(1) or None
-            game = match.group(2)
-            pider = match.group(3) or ""
-            page = int(match.group(4)) if match.group(4) else 1
-        else:
-            ea_name = clean_str.strip()
-            game = None
-            pider = ""
-            page = 1
+        clean_str = base_string.replace(" ", "").strip()
+
+        ea_name = None
+        game = None
+        pider = ""
+        page = 1
+
+        # 分割参数
+        parts = re.split(r"[，,]", clean_str)
+
+        for part in parts:
+            if part.startswith("game="):
+                game = part[len("game="):]
+            elif part.startswith("pider="):
+                pider = part[len("pider="):]
+            elif part.startswith("page="):
+                try:
+                    page = int(part[len("page="):])
+                except ValueError:
+                    pass  # 忽略无效的页码
+            elif ea_name is None and part:
+                ea_name = part
+
         return ea_name, game, pider, page
