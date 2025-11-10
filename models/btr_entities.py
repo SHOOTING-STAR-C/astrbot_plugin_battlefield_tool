@@ -262,6 +262,7 @@ class Weapon:
                  multi_kills: str,  # 多重击杀
                  body_kills: str,  # 身体击杀
                  deployments: str,  # 部署次数
+                 mastery_level: str,  # 精通等级
                  ):
         self.weapon_name = weapon_name
         self.category = category
@@ -282,6 +283,7 @@ class Weapon:
         self.multi_kills = multi_kills
         self.body_kills = body_kills
         self.deployments = deployments
+        self.mastery_level = mastery_level
 
     @classmethod
     def from_btr_dict(cls, data: Dict[str, Any]):
@@ -306,6 +308,7 @@ class Weapon:
             multi_kills=data.get("stats").get("multiKills").get("displayValue", "--"),
             body_kills=data.get("stats").get("bodyKills").get("displayValue", "--"),
             deployments=data.get("stats").get("deployments").get("displayValue", "--"),
+            mastery_level="",
         )
 
     @classmethod
@@ -326,10 +329,11 @@ class Weapon:
             damage_dealt=data.get("stats").get("damageDealt").get("displayValue", "--"),
             shots_fired=data.get("stats").get("shotsFired").get("displayValue", "--"),
             shots_hit=data.get("stats").get("shotsHit").get("displayValue", "--"),
-            headshot_kills=data.get("stats").get("headshotKills").get("displayValue", "--"),
+            headshot_kills=data.get("stats").get("headshotKills").get("value", "--"),
             time_played=str(round(data.get("stats").get("timePlayed").get("value", 0) / 3600, 1)),
-            multi_kills=data.get("stats").get("multiKills").get("displayValue", "--"),
-            body_kills=data.get("stats").get("bodyKills").get("displayValue", "--"),
+            multi_kills=data.get("stats").get("multiKills").get("value", "--"),
+            body_kills=data.get("stats").get("bodyKills").get("value", "--"),
+            mastery_level=data.get("stats").get("masteryLevel").get("value", "--"),
 
             deployments="",
             dmg_per_min="",
@@ -363,6 +367,7 @@ class Weapon:
             dmg_per_min="",
             scoped_kills="",
             hipfire_kills="",
+            mastery_level="",
         )
 
     @staticmethod
