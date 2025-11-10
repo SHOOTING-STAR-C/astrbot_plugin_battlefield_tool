@@ -26,7 +26,7 @@ class GtImageGenerator:
         Returns:
             返回生成的图片URL
         """
-        html = html_builder_func(data, game)
+        html = await html_builder_func(data, game)
         url = await html_render_func(
             html,
             {},
@@ -50,7 +50,7 @@ class GtImageGenerator:
         Returns:
             返回生成的图片URL
         """
-        html = html_builder_func(data, game)
+        html = await html_builder_func(data, game)
         url = await html_render_func(
             html,
             {},
@@ -74,7 +74,7 @@ class GtImageGenerator:
         Returns:
             返回生成的图片URL
         """
-        html = html_builder_func(data, game)
+        html = await html_builder_func(data, game)
         url = await html_render_func(
             html,
             {},
@@ -105,7 +105,7 @@ class GtImageGenerator:
         elif data["servers"] is not None and len(data["servers"]) == 2:
             height = 670
             
-        html = html_builder_func(data, game)
+        html = await html_builder_func(data, game)
         url = await html_render_func(
             html,
             {},

@@ -1,6 +1,7 @@
 from astrbot.api import logger
 from ...constants.battlefield_constants import (ImageUrls, BackgroundColors, GameMappings, TemplateConstants)
 from ...models.gt_entities import PlayerStats, Weapon, Vehicle, Server # 导入实体类
+from ..image_util import get_image_base64
 
 from typing import List, Dict, Any
 
@@ -61,7 +62,7 @@ def img_repair_vehicles(item_name:str,url:str):
 
 
 
-def gt_main_html_builder(raw_data: dict, game: str) -> str:
+async def gt_main_html_builder(raw_data: dict, game: str) -> str:
     """
     构建主要html
     Args:
@@ -75,7 +76,9 @@ def gt_main_html_builder(raw_data: dict, game: str) -> str:
 
     # 预处理原始数据，使其符合 PlayerStats.from_gt_dict 的期望
     processed_data = raw_data.copy()
-    if processed_data.get("avatar") is None:
+    if processed_data.get("avatar"):
+        processed_data["avatar"] = await get_image_base64(processed_data["avatar"])
+    else:
         processed_data["avatar"] = ImageUrls().DEFAULT_AVATAR
 
     processed_data["__hours_played"] = str(round(processed_data.get("secondsPlayed", 0) / 3600, 1))
@@ -103,7 +106,7 @@ def gt_main_html_builder(raw_data: dict, game: str) -> str:
     return html
 
 
-def gt_weapons_html_builder(raw_data: dict, game: str) -> str:
+async def gt_weapons_html_builder(raw_data: dict, game: str) -> str:
     """
     构建武器html
     Args:
@@ -117,7 +120,9 @@ def gt_weapons_html_builder(raw_data: dict, game: str) -> str:
 
     # 预处理原始数据，使其符合 PlayerStats.from_gt_dict 的期望
     processed_data = raw_data.copy()
-    if processed_data.get("avatar") is None:
+    if processed_data.get("avatar"):
+        processed_data["avatar"] = await get_image_base64(processed_data["avatar"])
+    else:
         processed_data["avatar"] = ImageUrls().DEFAULT_AVATAR
     
     # 计算 hours_played 并添加到 processed_data，以便 PlayerStats.from_gt_dict 使用
@@ -144,7 +149,7 @@ def gt_weapons_html_builder(raw_data: dict, game: str) -> str:
     return html
 
 
-def gt_vehicles_html_builder(raw_data: dict, game: str) -> str:
+async def gt_vehicles_html_builder(raw_data: dict, game: str) -> str:
     """
     构建载具html
     Args:
@@ -158,7 +163,9 @@ def gt_vehicles_html_builder(raw_data: dict, game: str) -> str:
 
     # 预处理原始数据，使其符合 PlayerStats.from_gt_dict 的期望
     processed_data = raw_data.copy()
-    if processed_data.get("avatar") is None:
+    if processed_data.get("avatar"):
+        processed_data["avatar"] = await get_image_base64(processed_data["avatar"])
+    else:
         processed_data["avatar"] = ImageUrls().DEFAULT_AVATAR
     
     # 计算 hours_played 并添加到 processed_data，以便 PlayerStats.from_gt_dict 使用
@@ -185,7 +192,7 @@ def gt_vehicles_html_builder(raw_data: dict, game: str) -> str:
     return html
 
 
-def gt_servers_html_builder(raw_data: Dict[str, Any], game: str) -> str:
+async def gt_servers_html_builder(raw_data: Dict[str, Any], game: str) -> str:
     """
     构建服务器html
     Args:
