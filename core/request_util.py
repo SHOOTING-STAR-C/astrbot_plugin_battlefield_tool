@@ -155,6 +155,8 @@ async def btr_request_api(prop: str, params: Optional[dict] = None, timeout: int
             if response.status == 200:
                 result = await response.json()
                 return result
+            elif response.status == 403:
+                return "用户数据是私有的，请打开设置->系统->游戏数据分享"
             else:
                 error_dict = await response.json()
                 error_msg = (
