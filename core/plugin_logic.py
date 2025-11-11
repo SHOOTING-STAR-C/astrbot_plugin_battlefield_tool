@@ -25,6 +25,12 @@ from .gametool.gt_image_generator import GtImageGenerator
 from .btr.btr_image_generator import BtrImageGenerator
 
 from ..models.player_data import PlayerDataRequest
+from .exceptions import (
+    GameNotSupportedError,
+    UserNotBoundError,
+    PageLimitExceededError,
+    InvalidParameterError
+)
 
 import re
 import time
@@ -58,15 +64,15 @@ class BattlefieldPluginLogic:
             return event.get_group_id()
         return event.get_sender_id()
 
-    async def _resolve_game_tag(self, game_input: Union[str, None], session_channel_id: str) -> tuple[
-        Union[str, None], Union[str, None]]:
+    async def _resolve_game_tag(self, game_input: Union[str, None], session_channel_id: str) -> str:
         """
         解析游戏代号，获取默认值并进行验证。
         Returns:
-            tuple: (game_tag, error_message)
+            str: 游戏代号
+        Raises:
+            GameNotSupportedError: 当游戏不支持时抛出
         """
         game = game_input
-        error_msg = None
 
         if game is None:
             bd_game = await self.db_service.query_session_channel(session_channel_id)
@@ -75,39 +81,38 @@ class BattlefieldPluginLogic:
             else:
                 game = bd_game["default_game_tag"]
 
+        # 标准化游戏代号
         if game == 'bf5':
             game = 'bfv'
         if game == '2042':
             game = 'bf2042'
 
+        # 验证游戏是否支持
         if game not in self.SUPPORTED_GAMES:
-            error_msg = (
-                f"服务器 '{game}' 未找到\n"
-                f"• 请检查游戏代号是否正确\n"
-                f"• 可用代号: {'、'.join(self.SUPPORTED_GAMES)}"
-            )
-            game = None  # 确保在错误时返回None
-        return game, error_msg
+            raise GameNotSupportedError(game, self.SUPPORTED_GAMES)
+        
+        return game
 
     async def _resolve_ea_name(self, ea_name_input: Union[str, None], qq_id: str) -> tuple[
-        Union[str, None], Union[str, None], Union[str, None]]:
+        str, str]:
         """
         解析EA账号名，获取默认值。
         Returns:
-            tuple: (ea_name, error_message)
+            tuple: (ea_name, pider)
+        Raises:
+            UserNotBoundError: 当用户未绑定时抛出
         """
         ea_name = ea_name_input
         pider = ""
-        error_msg = None
 
         if ea_name is None:
             bind_data = await self.db_service.query_bind_user(qq_id)
             if bind_data is None:
-                error_msg = "请先使用bind [ea_name]绑定"
+                raise UserNotBoundError(qq_id)
             else:
                 ea_name = bind_data.get("ea_name")
                 pider = bind_data.get("ea_id", None)
-        return ea_name, pider, error_msg
+        return ea_name, pider
 
     async def handle_btr_response(self, data_type, game, html_render_func, stat_data, weapon_data: list = None,
                                   vehicle_data=None, soldier_data=None, is_llm: bool = False,
@@ -206,24 +211,19 @@ class BattlefieldPluginLogic:
                 server_name = ea_name
 
             # 处理游戏代号
-            game, game_error = await self._resolve_game_tag(game, session_channel_id)
-            if game_error:
-                error_msg = game_error
-                raise ValueError(error_msg)  # 抛出异常以便被捕获
+            game = await self._resolve_game_tag(game, session_channel_id)
 
             # 处理EA账号名
             if not ea_name and not pider:
-                ea_name, pider, ea_name_error = await self._resolve_ea_name(ea_name, qq_id)
-                if ea_name_error:
-                    error_msg = ea_name_error
-                    raise ValueError(error_msg)  # 抛出异常以便被捕获
+                ea_name, pider = await self._resolve_ea_name(ea_name, qq_id)
 
             # 战地1使用繁中
             if game == "bf1":
                 lang = self.LANG_TW
 
+            # 验证页码限制
             if page > 25:
-                error_msg = "只能查询25页"
+                raise PageLimitExceededError()
 
         except Exception as e:
             error_msg = str(e)
@@ -261,9 +261,10 @@ class BattlefieldPluginLogic:
                 ea_name_temp = bind_data["ea_name"]
                 pider = bind_data["ea_id"]
         # 处理游戏代号
-        game, game_error = await self._resolve_game_tag(game, session_channel_id)
-        if game_error:
-            error_msg = game_error
+        try:
+            game = await self._resolve_game_tag(game, session_channel_id)
+        except GameNotSupportedError as e:
+            error_msg = str(e)
 
         # 战地1使用繁中
         if game == "bf1":

@@ -4,6 +4,7 @@ import aiohttp
 
 from astrbot.api import logger
 from typing import Optional
+from .exceptions import NetworkError, APIError, DataParseError, TimeoutError, UserInputError,PrivateDataError
 
 
 
@@ -60,11 +61,11 @@ async def gt_request_api(game, prop="stats", params=None, timeout=15, session=No
     except aiohttp.ClientError as e:
         error_msg = f"网络请求异常: {str(e)}"
         logger.error(error_msg)
-        raise ConnectionError(error_msg) from e
+        raise NetworkError(error_msg) from e
     except json.JSONDecodeError as e:
         error_msg = f"JSON解析失败: {str(e)}"
         logger.error(error_msg)
-        raise ValueError(error_msg) from e
+        raise DataParseError(error_msg) from e
     except asyncio.TimeoutError as e:
         error_msg = f"请求超时: {timeout}秒内未收到响应"
         logger.error(error_msg)
@@ -137,7 +138,7 @@ async def btr_request_api(prop: str, params: Optional[dict] = None, timeout: int
 
     #下面几行是shi山
     if params.get("player_name") is None and params.get("pider") is None:
-        raise ValueError("ea_name，或pider必填")
+        raise UserInputError("ea_name，或pider必填", "玩家名称或pider参数必填")
     if params.get("player_name") is None:
         params["player_name"] = ""
     if params.get("pider") is None:
@@ -156,7 +157,7 @@ async def btr_request_api(prop: str, params: Optional[dict] = None, timeout: int
                 result = await response.json()
                 return result
             elif response.status == 403:
-                return "用户数据是私有的，请打开设置->系统->游戏数据分享"
+                raise PrivateDataError()
             else:
                 error_dict = await response.json()
                 error_msg = (
@@ -167,11 +168,11 @@ async def btr_request_api(prop: str, params: Optional[dict] = None, timeout: int
     except aiohttp.ClientError as e:
         error_msg = f"API网络请求异常: {str(e)}"
         logger.error(error_msg)
-        raise ConnectionError(error_msg) from e
+        raise NetworkError(error_msg) from e
     except json.JSONDecodeError as e:
         error_msg = f"API JSON解析失败: {str(e)}"
         logger.error(error_msg)
-        raise ValueError(error_msg) from e
+        raise DataParseError(error_msg) from e
     except asyncio.TimeoutError as e:
         error_msg = f"API请求超时: {timeout}秒内未收到响应"
         logger.error(error_msg)
