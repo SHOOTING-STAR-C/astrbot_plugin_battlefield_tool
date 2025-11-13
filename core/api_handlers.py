@@ -141,6 +141,7 @@ class ApiHandlers:
 
             # 处理正常数据
             update_hash = data.get("metadata").get("updateHash")
+            request_data.ea_name = data.get("platformInfo").get("platformUserHandle")
 
             # 使用 async for 来正确捕获异常
             async for matches_data in self._fetch_btr_matches_data(event, request_data, update_hash):
@@ -170,13 +171,13 @@ class ApiHandlers:
                                                                                   mode_data, maps_data,
                                                                                   matches_timestamp,
                                                                                   provider):
-
-                    if request_data.page < 25 and request_data.page <= len(matches_data.get("matches")):
+                    total_page = len(matches_data.get("matches"))
+                    if request_data.page < 25 and request_data.page < len(matches_data.get("matches")):
                         if request_data.pider:
                             next_page = f"战报 {request_data.ea_name},game=bf6,pider={request_data.pider},page={request_data.page + 1}"
                         else:
                             next_page = f"战报 {request_data.ea_name},game=bf6,page={request_data.page + 1}"
-                    yield result, next_page
+                    yield result, next_page,total_page
 
     async def fetch_gt_servers_data(self, request_data: PlayerDataRequest, timeout_config: int, session):
         """

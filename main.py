@@ -154,13 +154,13 @@ class BattlefieldTool(Star):
 
         logger.info(f"玩家id:{request_data.ea_name}，查询游戏:{request_data.game}")
 
-        async for result, next_page in self.api_handlers.handle_btr_matches(event, request_data, provider):
+        async for result, next_page,total_page in self.api_handlers.handle_btr_matches(event, request_data, provider):
             yield event.image_result(result)
             if next_page:
                 prefix = ""
                 if len(self.wake_prefix) > 0:
                     prefix = self.wake_prefix[0]
-                yield event.plain_result("可以用下面的指令翻页")
+                yield event.plain_result(f"可以用下面的指令翻页，当前页:{request_data.page}/{total_page}")
                 yield event.plain_result(f"{prefix}{next_page}")
 
 
