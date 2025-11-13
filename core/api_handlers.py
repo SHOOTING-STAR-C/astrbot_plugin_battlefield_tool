@@ -141,7 +141,7 @@ class ApiHandlers:
 
             # 处理正常数据
             update_hash = data.get("metadata").get("updateHash")
-            request_data.ea_name = data.get("platformInfo").get("platformUserHandle")
+            # request_data.ea_name = data.get("platformInfo").get("platformUserHandle")
 
             # 使用 async for 来正确捕获异常
             async for matches_data in self._fetch_btr_matches_data(event, request_data, update_hash):
