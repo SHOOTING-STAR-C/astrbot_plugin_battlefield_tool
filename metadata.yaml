@@ -1,5 +1,5 @@
 name: astrbot_plugin_battlefield_tool # 这是你的插件的唯一识别名。
 description: 战地风云战绩查询插件 # 插件简短描述
-version: v2.1.0 # 插件版本号。格式：v1.1.1 或者 v1.1
+version: v2.1.1 # 插件版本号。格式：v1.1.1 或者 v1.1
 author: SHOOTING_STAR_C # 作者
 repo: https://github.com/SHOOTING-STAR-C/astrbot_plugin_battlefield_tool # 插件的仓库地址
