@@ -4,7 +4,7 @@ import aiohttp
 
 from astrbot.api import logger
 from typing import Optional
-from .exceptions import NetworkError, APIError, DataParseError, TimeoutError, UserInputError,PrivateDataError
+from .exceptions import NetworkError, APIError, DataParseError, TimeoutError, UserInputError,PrivateDataError,UserNotFoundError
 
 
 
@@ -158,6 +158,8 @@ async def btr_request_api(prop: str, params: Optional[dict] = None, timeout: int
                 return result
             elif response.status == 403:
                 raise PrivateDataError()
+            elif response.status == 404:
+                raise UserNotFoundError(params["player_name"])
             else:
                 error_dict = await response.json()
                 error_msg = (

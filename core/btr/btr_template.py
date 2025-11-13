@@ -267,7 +267,12 @@ async def btr_matches_html_builder(ea_name: str, stat_data: dict, weapons_data, 
         matches_num += mode_entity.matches_played
 
     prompt = build_prompt(stat_entity, weapons_entities, vehicles_entities, soldiers_entities, modes_entities, maps_entities, map_total)
-    llm_resp = await provider.text_chat(prompt=prompt)
+    try:
+        llm_resp = await provider.text_chat(prompt=prompt)
+    except Exception as e:
+        logger.error(e)
+        llm_resp = "&&&"
+
 
     resp_arr = ["",""]
     if llm_resp and llm_resp.completion_text:

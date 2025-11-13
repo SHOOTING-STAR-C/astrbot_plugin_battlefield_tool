@@ -157,9 +157,20 @@ class GameNotSupportedForOperationError(UserInputError):
         super().__init__(f"游戏 {game} 不支持操作 {operation}", user_message, "GAME_NOT_SUPPORTED_FOR_OPERATION")
 
 
+class UserNotFoundError(UserInputError):
+    """用户未找到异常"""
+
+    def __init__(self, ea_name: str = None):
+        if ea_name:
+            user_message = f"未找到用户 '{ea_name}'，请检查账户名称是否正确"
+        else:
+            user_message = "未找到用户，请检查名称是否正确"
+        super().__init__(f"用户未找到: {ea_name}", user_message, "USER_NOT_FOUND")
+
+
 class PrivateDataError(UserInputError):
     """私有数据异常"""
-    
+
     def __init__(self, message: str = "用户数据是私有的，请打开设置->系统->游戏数据分享"):
         super().__init__("私有数据访问被拒绝", message, "PRIVATE_DATA")
 
