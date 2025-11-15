@@ -13,7 +13,7 @@ VEHICLES_TEMPLATE = templates["btr_vehicles"]
 SOLDIERS_TEMPLATE = templates["btr_soldiers"]
 MATCHES_TEMPLATE = templates["btr_matches"]
 
-base_prompt = "你是一个战地风云游戏前线记者，根据以下游戏数据生成一个标题和内容，要足够炸裂并吸引眼球，评判标准kd<2是薯条,kpm<1是薯条此标准仅适用于除大逃杀以外的模式。可以适当调侃薯条，格式要求标题和内容要用'&&&'分开，字数保持在500-800个字，注意回复要用纯文本，且不使用md等格式"
+base_prompt = "你是一个战地风云游戏前线记者，根据以下游戏数据生成一个标题和内容，要足够炸裂并吸引眼球，评判标准kd<2是薯条,kpm<1是薯条此标准仅适用于除大逃杀以外的模式。可以适当调侃薯条，格式要求标题和内容要用'&&&'分开，字数控制在500到800个字，注意回复要用纯文本，且不使用md等格式"
 
 
 
