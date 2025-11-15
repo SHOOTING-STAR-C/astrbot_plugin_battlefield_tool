@@ -14,8 +14,6 @@ from .core.exceptions import (
 )
 
 import aiohttp
-import asyncio
-from astrbot.core.message.components import Plain, Image
 
 
 @register(
@@ -157,20 +155,13 @@ class BattlefieldTool(Star):
         logger.info(f"玩家id:{request_data.ea_name}，查询游戏:{request_data.game}")
 
         async for result, next_page,total_page in self.api_handlers.handle_btr_matches(event, request_data, provider):
-            # 方案3：使用消息链构建原始消息组件
-            chain = []
-            # result 是图片URL，创建Image组件
-            chain.append(Image.fromURL(result))
-
+            yield event.image_result(result)
             if next_page:
                 prefix = ""
                 if len(self.wake_prefix) > 0:
                     prefix = self.wake_prefix[0]
-                chain.append(Plain(f"可以用下面的指令翻页，当前页:{request_data.page}/{total_page}"))
-                chain.append(Plain(f"{prefix}{next_page}"))
-
-            # 使用chain_result发送消息链
-            yield event.chain_result(chain)
+                yield event.plain_result(f"可以用下面的指令翻页，当前页:{request_data.page}/{total_page}")
+                yield event.plain_result(f"{prefix}{next_page}")
 
 
     @filter.command("servers", alias=["服务器"])
