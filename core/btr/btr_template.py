@@ -13,6 +13,9 @@ VEHICLES_TEMPLATE = templates["btr_vehicles"]
 SOLDIERS_TEMPLATE = templates["btr_soldiers"]
 MATCHES_TEMPLATE = templates["btr_matches"]
 
+base_prompt = "你是一个战地风云游戏前线记者，根据以下游戏数据生成一个标题和内容，要足够炸裂并吸引眼球，评判标准kd<2是薯条,kpm<1是薯条此标准仅适用于除大逃杀以外的模式。可以适当调侃薯条，格式要求标题和内容要用'&&&'分开，字数保持在500-800个字，注意回复要用纯文本，且不使用md等格式"
+
+
 
 def sort_list_of_dicts(list_of_dicts, key):
     """降序排序，支持点分隔的嵌套键，如果值为零就删除该项"""
@@ -268,10 +271,10 @@ async def btr_matches_html_builder(ea_name: str, stat_data: dict, weapons_data, 
 
     prompt = build_prompt(stat_entity, weapons_entities, vehicles_entities, soldiers_entities, modes_entities, maps_entities, map_total)
     try:
-        llm_resp = await provider.text_chat(prompt=prompt)
+        llm_resp = await provider.text_chat(system_prompt = base_prompt,prompt=prompt)
     except Exception as e:
         logger.error(e)
-        llm_resp = "&&&"
+        llm_resp = " &&& "
 
 
     resp_arr = ["",""]
@@ -300,9 +303,8 @@ async def btr_matches_html_builder(ea_name: str, stat_data: dict, weapons_data, 
 
 def build_prompt(stat_entity, weapons_data, vehicles_data, soldier_data, mode_data, maps_data, map_total):
     """构建提示词prompt"""
-    base_prompt = "你是一个战地风云游戏前线记者，根据以下游戏数据生成一个标题和内容，要足够炸裂并吸引眼球，评判标准kd<2是薯条,kpm<1是薯条，可以适当调侃薯条，格式要求标题和内容要用'&&&'分开，总字数不超过800个字，注意回复要用纯文本"
 
-    recent_prompt = base_prompt + f"玩家{stat_entity.user_name}（名字发给你什么样，你就写什么样子，禁止翻译）"
+    recent_prompt = f"玩家{stat_entity.user_name}（名字发给你什么样，你就写什么样子，禁止翻译）"
 
 
     if map_total:
