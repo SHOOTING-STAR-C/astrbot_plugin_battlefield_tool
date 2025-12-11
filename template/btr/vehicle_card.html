@@ -39,10 +39,18 @@
             <div class="text-1xl text-yellow-400">KPM</div>
             <div class="text-2xl font-bold font-mono">{{ vehicle_entity.kills_per_minute }}</div>
         </div>
+        {% if game == 'bf6' %}
+        <div>
+            <div class="text-1xl text-yellow-400">摧毁</div>
+            <div class="text-2xl font-bold font-mono">{{ vehicle_entity.destroyed_with }}</div>
+        </div>
+        {% endif %}
+        {% if game == 'bf2042' %}
         <div>
             <div class="text-1xl text-yellow-400">摧毁</div>
             <div class="text-2xl font-bold font-mono">{{ vehicle_entity.destroyed }}</div>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endmacro %}
