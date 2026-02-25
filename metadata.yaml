@@ -3,3 +3,6 @@ description: 战地风云战绩查询插件 # 插件简短描述
 version: v2.1.5 # 插件版本号。格式：v1.1.1 或者 v1.1
 author: SHOOTING_STAR_C # 作者
 repo: https://github.com/SHOOTING-STAR-C/astrbot_plugin_battlefield_tool # 插件的仓库地址
+astrbot_version: ">=3.4"
+support_platforms:
+  - aiocqhttp
