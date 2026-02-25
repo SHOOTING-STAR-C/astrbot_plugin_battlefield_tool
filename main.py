@@ -20,7 +20,7 @@ import aiohttp
     "astrbot_plugin_battlefield_tool",  # name
     "SHOOTING_STAR_C",  # author
     "战地风云战绩查询插件",  # desc
-    "v2.1.4",  # version
+    "v2.1.5",  # version
 )
 class BattlefieldTool(Star):
 
@@ -208,11 +208,10 @@ class BattlefieldTool(Star):
     @filter.llm_tool(name="bf_tool_bind")
     @handle_exceptions()
     async def bf_tool_bind(self, event: AstrMessageEvent, ea_name: str, user_id: str = None):
-        """
-            用户绑定默认查询的EA账户名
-            Args:
-                ea_name (string): 绑定的账户名，必填
-                user_id (string): 用户帮别人绑定的用户id
+        """用户绑定默认查询的EA账户名
+        Args:
+            ea_name (string): 绑定的账户名，必填
+            user_id (string): 用户帮别人绑定的用户id
         """
         if not user_id:
             # 获取用户
@@ -222,12 +221,11 @@ class BattlefieldTool(Star):
     @filter.llm_tool(name="bf_tool_stat")
     @handle_exceptions()
     async def bf_tool_stat(self, event: AstrMessageEvent, user_id: str = None, game: str = None, ea_name: str = None):
-        """
-            战地风云系列查询战绩
-            Args:
-                user_id (string): 用户查询别人战绩时填写的id，用户没有指明就不要填，函数会自动查询
-                game (string):  游戏代号(可选bf4、bf1、bfv、bf2042、bf6)，用户没有指明就不要填，函数会自动查询
-                ea_name (string): 查询其他人时EA的账户名，注意是EA账户名，不是用户id，用户没有指明就不要填，函数会自动查询
+        """战地风云系列查询战绩
+        Args:
+            user_id (string): 用户查询别人战绩时填写的id，用户没有指明就不要填，函数会自动查询
+            game (string): 游戏代号(可选bf4、bf1、bfv、bf2042、bf6)，用户没有指明就不要填，函数会自动查询
+            ea_name (string): 查询其他人时EA的账户名，注意是EA账户名，不是用户id，用户没有指明就不要填，函数会自动查询
         """
         logger.debug(f"""{ea_name},{user_id},{game}""")
         request_data = await self.plugin_logic.handle_player_llm_request(event, ea_name, user_id, game)
