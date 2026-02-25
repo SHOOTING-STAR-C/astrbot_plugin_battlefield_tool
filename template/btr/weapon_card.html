@@ -6,7 +6,7 @@
         <div class="text-3xl font-bold text-white truncate" style="max-width: 190px;">{{ weapon_entity.weapon_name }}</div>
         {% endif %}
         {% if game == 'bf6' %}
-        <img src="{{ weapon_entity.image }}" class="object-scale-down" style="height:45px;width:100px;" />
+        <img src="{{ weapon_entity.image }}" class="object-scale-down" style="height:45px;width:100px;" onerror="this.src='data:image/svg+xml,%3Csvg%20width%3D%22576%22%20height%3D%22216%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Ctext%20x%3D%22288%22%20y%3D%22156%22%20font-size%3D%22160%22%20text-anchor%3D%22middle%22%20fill%3D%22white%22%3E%3F%3C%2Ftext%3E%3C%2Fsvg%3E'"/>
         <div class="flex mt-1">{{ weapon_entity.weapon_name }}</div>
         {% endif %}
         <div class="flex mt-1">
