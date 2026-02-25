@@ -782,6 +782,7 @@ class Modes:
             "King of the Hill": "山丘之王",
             "Payload": "Payload",
             "BR Quads": "四人大逃杀",
+            "Sabotage": "爆破",
         }
         return category_map.get(category_name, category_name)
     def __repr__(self):
@@ -839,6 +840,8 @@ class Maps:
             "Manhattan Bridge": "曼哈顿大桥",
             "New Sobek City": "新索贝克城",
             "Blackwell Fields": "布莱克威尔原野",
+            "Contaminated": "污染",
+            "Eastwood": "东方木林",
         }
         return category_map.get(map_name, map_name)
 
