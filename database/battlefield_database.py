@@ -3,6 +3,7 @@ from astrbot.api.star import StarTools
 from astrbot.api import logger
 
 import aiosqlite
+import asyncio
 import os
 
 
@@ -18,6 +19,7 @@ class BattleFieldDataBase:
         else:
             self.bf_db_path = bf_db_path / self.bf_db_name
         self._conn = None
+        self._lock = asyncio.Lock()
 
     async def _init_db(self, conn: aiosqlite.Connection):
         """使用给定连接初始化数据库"""
@@ -67,17 +69,24 @@ class BattleFieldDataBase:
         Raises:
             RuntimeError: 当连接失败时抛出
         """
-        # 简化连接检查：如果连接存在就直接复用
+        # 如果连接存在就直接复用
         if self._conn:
             return self._conn
 
-        try:
-            conn = await aiosqlite.connect(self.bf_db_path)
-            conn.text_factory = str
-            return conn
-        except aiosqlite.Error as e:
-            logger.error(f"数据库连接失败: {e}")
-            raise RuntimeError(f"无法连接到数据库: {e}")
+        # 使用锁防止多协程同时创建连接
+        async with self._lock:
+            # 双重检查，防止在等待锁期间其他协程已创建连接
+            if self._conn:
+                return self._conn
+
+            try:
+                conn = await aiosqlite.connect(self.bf_db_path)
+                conn.text_factory = str
+                self._conn = conn
+                return conn
+            except aiosqlite.Error as e:
+                logger.error(f"数据库连接失败: {e}")
+                raise RuntimeError(f"无法连接到数据库: {e}")
 
     async def close(self):
         """关闭数据库连接"""
