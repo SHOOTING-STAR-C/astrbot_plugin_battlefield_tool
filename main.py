@@ -46,7 +46,7 @@ class BattlefieldTool(Star):
                                                    self.img_quality,
                                                    self._session, self.bf_prompt, self.default_platform)
         self.api_handlers = ApiHandlers(self.plugin_logic, self.html_render, self.timeout_config, self.ssc_token,
-                                        self._session,self.wake_prefix)
+                                        self._session, self.wake_prefix)
 
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
@@ -111,7 +111,6 @@ class BattlefieldTool(Star):
             async for result in self.api_handlers.fetch_gt_data(event, request_data, "vehicles", "vehicles"):
                 yield event.image_result(result)
 
-
     @filter.command("soldiers", alias=["士兵"])
     @handle_exceptions()
     async def bf_soldier(self, event: AstrMessageEvent):
@@ -129,7 +128,6 @@ class BattlefieldTool(Star):
         logger.info(f"玩家id:{request_data.ea_name}，查询游戏:{request_data.game}")
         async for result in self.api_handlers.handle_btr_game(event, request_data, "soldiers"):
             yield event.image_result(result)
-
 
     @filter.command("recent", alias=["最近", "战报"])
     @handle_exceptions()
@@ -154,7 +152,7 @@ class BattlefieldTool(Star):
 
         logger.info(f"玩家id:{request_data.ea_name}，查询游戏:{request_data.game}")
 
-        async for result, next_page,total_page in self.api_handlers.handle_btr_matches(event, request_data, provider):
+        async for result, next_page, total_page in self.api_handlers.handle_btr_matches(event, request_data, provider):
             yield event.image_result(result)
             if next_page:
                 prefix = ""
@@ -162,7 +160,6 @@ class BattlefieldTool(Star):
                     prefix = self.wake_prefix[0]
                 yield event.plain_result(f"可以用下面的指令翻页，当前页:{request_data.page}/{total_page}")
                 yield event.plain_result(f"{prefix}{next_page}")
-
 
     @filter.command("servers", alias=["服务器"])
     @handle_exceptions()
@@ -191,7 +188,6 @@ class BattlefieldTool(Star):
                 event, servers_data, "servers", request_data.game, self.html_render
         ):
             yield event.image_result(result)
-
 
     @filter.command("bind", alias=["绑定"])
     @handle_exceptions()
@@ -334,3 +330,4 @@ class BattlefieldTool(Star):
         """可选择实现异步的插件销毁方法，当插件卸载/停用时会调用。"""
         if self._session:
             await self._session.close()
+        await self.db.close()
