@@ -198,19 +198,4 @@ class ApiHandlers:
         )
         return servers_data
 
-    async def check_ea_name(self, request_data: PlayerDataRequest, timeout_config: int, session):
-        """检查ea_name正确性，并返回pid"""
-        stats_data = await gt_request_api(
-            "bfv",
-            "stats",
-            {
-                "name": request_data.ea_name,
-                "platform": self.plugin_logic.default_platform,
-            },
-            timeout_config,
-            session=session,
-        )
-        if stats_data is None:
-            return stats_data.get("userId")
-        else:
-            return None
+    
