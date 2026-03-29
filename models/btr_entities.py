@@ -842,6 +842,7 @@ class Maps:
             "Blackwell Fields": "布莱克威尔原野",
             "Contaminated": "污染",
             "Eastwood": "东方木林",
+            "Hagental Base": "哈根塔尔",
         }
         return category_map.get(map_name, map_name)
 
