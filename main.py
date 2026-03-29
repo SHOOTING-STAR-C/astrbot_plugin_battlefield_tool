@@ -74,7 +74,7 @@ class BattlefieldTool(Star):
             async for result in self.api_handlers.fetch_gt_data(event, request_data, "stat", "all"):
                 yield event.image_result(result)
 
-    @filter.command("weapons", alias=["武器"])
+    @filter.command("weapons", alias=["武器","weapon"])
     @handle_exceptions()
     async def bf_weapons(self, event: AstrMessageEvent):
         """查询用户武器数据"""
@@ -93,7 +93,7 @@ class BattlefieldTool(Star):
             async for result in self.api_handlers.fetch_gt_data(event, request_data, "weapons", "weapons"):
                 yield event.image_result(result)
 
-    @filter.command("vehicles", alias=["载具"])
+    @filter.command("vehicles", alias=["载具","vehicle"])
     @handle_exceptions()
     async def bf_vehicles(self, event: AstrMessageEvent):
         """查询载具数据"""
@@ -111,7 +111,7 @@ class BattlefieldTool(Star):
             async for result in self.api_handlers.fetch_gt_data(event, request_data, "vehicles", "vehicles"):
                 yield event.image_result(result)
 
-    @filter.command("soldiers", alias=["士兵"])
+    @filter.command("soldiers", alias=["士兵","soldier"])
     @handle_exceptions()
     async def bf_soldier(self, event: AstrMessageEvent):
         """查询士兵数据 (仅限bf2042,bf6)"""
@@ -161,7 +161,7 @@ class BattlefieldTool(Star):
                 yield event.plain_result(f"可以用下面的指令翻页，当前页:{request_data.page}/{total_page}")
                 yield event.plain_result(f"{prefix}{next_page}")
 
-    @filter.command("servers", alias=["服务器"])
+    @filter.command("servers", alias=["服务器","server"])
     @handle_exceptions()
     async def bf_servers(self, event: AstrMessageEvent):
         """查询服务器数据"""
