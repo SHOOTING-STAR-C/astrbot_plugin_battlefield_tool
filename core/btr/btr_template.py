@@ -3,6 +3,7 @@ from ...constants.battlefield_constants import (ImageUrls, BackgroundColors, Gam
 from ...models.btr_entities import PlayerStats, Weapon, Vehicle, Soldier, Modes, Maps
 from ..image_util import get_image_base64
 
+import re
 import time
 
 # 获取模板
@@ -13,7 +14,7 @@ VEHICLES_TEMPLATE = templates["btr_vehicles"]
 SOLDIERS_TEMPLATE = templates["btr_soldiers"]
 MATCHES_TEMPLATE = templates["btr_matches"]
 
-base_prompt = "你是一个战地风云游戏前线记者。根据以下游戏数据，生成一个标题和内容。标题和内容要足够炸裂并吸引眼球，用词激昂，富有冲击力。可以适当调侃“薯条”玩家，言辞犀利但不失幽默。在描述战场局势和玩家表现时，请务必详细且生动。评判标准：KD<2和KPM<1为“薯条”玩家，此标准仅适用于除大逃杀以外的模式。格式要求：标题和内容要用'&&&'分开。字数务必控制在500到800个字之间。回复要用纯文本，且不使用md等格式。为了达到字数要求，请详细阐述以下内容：标题：务必爆炸性，吸引眼球，长度适中。内容：第一段（约150-200字）：开篇即点燃战火，用极具冲击力的语言描绘当前战场的紧张局势、交火激烈程度以及玩家的生死一线。可以引用虚构的“前线报道员”或“指挥官”的简短发言，渲染氛围，奠定报道基调。第二段（约200-250字）：深入剖析基于提供的游戏数据，那些表现平平甚至拉胯的“薯条”玩家现象。结合KD和KPM标准，用尖锐且略带嘲讽的口吻，详细描述他们的“贡献”以及对团队的影响。可以生动描述他们的“奇葩”行为或数据表现，并分析这些数据背后的含义。第三段（约150-200字）：总结战局，展望未来。呼吁真正的“精英战士”挺身而出，或对未来的战况做出大胆预测。再次强调游戏数据的残酷现实，并以记者的视角对整场战役进行一个振奋人心的收尾，可以增加一些对胜利的渴望或对未来的警示。请务必注意，内容需充实饱满，避免空泛，确保每一个段落都详细展开，以达到整体中文字数要求。"
+base_prompt = "你是一个战地风云游戏前线记者。根据以下游戏数据，生成一个标题和内容。标题和内容要足够炸裂并吸引眼球，用词激昂，富有冲击力。可以适当调侃“薯条”玩家，言辞犀利但不失幽默。在描述战场局势和玩家表现时，请务必详细且生动。评判标准：KD<2和KPM<1为“薯条”玩家，此标准仅适用于除大逃杀以外的模式。格式要求：标题和内容分别放在<article>和<content>标签中，示例：<article>标题内容</article><content>内容正文</content>。回复使用纯文本，且不使用md等格式。字数务必控制在500到800个字之间。为了达到字数要求，请详细阐述以下内容：标题：务必爆炸性，吸引眼球，长度适中。内容：第一段（约150-200字）：开篇即点燃战火，用极具冲击力的语言描绘当前战场的紧张局势、交火激烈程度以及玩家的生死一线。可以引用虚构的“前线报道员”或“指挥官”的简短发言，渲染氛围，奠定报道基调。第二段（约200-250字）：深入剖析基于提供的游戏数据，那些表现平平甚至拉胯的“薯条”玩家现象。结合KD和KPM标准，用尖锐且略带嘲讽的口吻，详细描述他们的“贡献”以及对团队的影响。可以生动描述他们的“奇葩”行为或数据表现，并分析这些数据背后的含义。第三段（约150-200字）：总结战局，展望未来。呼吁真正的“精英战士”挺身而出，或对未来的战况做出大胆预测。再次强调游戏数据的残酷现实，并以记者的视角对整场战役进行一个振奋人心的收尾，可以增加一些对胜利的渴望或对未来的警示。请务必注意，内容需充实饱满，避免空泛，确保每一个段落都详细展开，以达到整体中文字数要求。"
 
 
 
@@ -277,9 +278,13 @@ async def btr_matches_html_builder(ea_name: str, stat_data: dict, weapons_data, 
         llm_resp = " &&& "
 
 
-    resp_arr = ["",""]
+    resp_arr = ["", ""]
     if llm_resp and llm_resp.completion_text:
-        resp_arr = llm_resp.completion_text.strip().split("&&&")
+        text = llm_resp.completion_text.strip()
+        title_match = re.search(r'<article>(.*?)</article>', text, re.DOTALL)
+        content_match = re.search(r'<content>(.*?)</content>', text, re.DOTALL)
+        resp_arr[0] = title_match.group(1).strip() if title_match else ""
+        resp_arr[1] = content_match.group(1).strip() if content_match else ""
 
     html = MATCHES_TEMPLATE.render(
         bf6_background=bf6_background,
