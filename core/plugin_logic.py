@@ -115,7 +115,7 @@ class BattlefieldPluginLogic:
         return ea_name, pider
 
     async def handle_btr_response(self, data_type, game, html_render_func, stat_data, weapon_data: list = None,
-                                  vehicle_data=None, soldier_data=None, is_llm: bool = False,
+                                  vehicle_data=None, soldier_data=None, is_llm: bool = False, item_type: str = None,
                                   ):
         """处理bf6/bf2042等新API的响应逻辑"""
         if is_llm:
@@ -132,7 +132,7 @@ class BattlefieldPluginLogic:
 
             pic_url = await generator_func(game, html_render_func, html_builder_func, stat_data, weapon_data,
                                            vehicle_data,
-                                           soldier_data)
+                                           soldier_data, item_type)
             yield pic_url
 
     async def handle_btr_matches_response(self, game,ea_name, html_render_func, stat_data, weapon_data, vehicle_data,
@@ -155,7 +155,8 @@ class BattlefieldPluginLogic:
             return "API返回未知错误"
         return None
 
-    async def process_api_response(self, event, api_data, data_type, game, html_render_func, is_llm: bool = False):
+    async def process_api_response(self, event, api_data, data_type, game, html_render_func, is_llm: bool = False,
+                                   item_type: str = None):
         """处理API响应通用逻辑"""
         if is_llm:
             yield gt_main_llm_builder(api_data, game, self.bf_prompt)
@@ -176,7 +177,7 @@ class BattlefieldPluginLogic:
             }
 
             generator_func, html_builder_func = handler_map[data_type]
-            pic_url = await generator_func(api_data, game, html_render_func, html_builder_func)
+            pic_url = await generator_func(api_data, game, html_render_func, html_builder_func, item_type)
             yield pic_url
 
     async def handle_player_data_request(
@@ -200,10 +201,11 @@ class BattlefieldPluginLogic:
         server_name = None
         pider = ""
         page = 0
+        item_type = None
 
         try:
             # 解析命令
-            ea_name, game, pider, page = await self._parse_input_string(
+            ea_name, game, pider, page, item_type = await self._parse_input_string(
                 str_to_remove_list, message_str
             )
             # 由于共用解析方法所以这里赋个值
@@ -238,6 +240,7 @@ class BattlefieldPluginLogic:
             server_name=server_name,
             error_msg=error_msg,
             page=page,
+            item_type=item_type,
         )
 
     async def handle_player_llm_request(self, event: AstrMessageEvent, ea_name: str = None, user_id: str = None,
@@ -290,7 +293,7 @@ class BattlefieldPluginLogic:
             str_to_remove_list: 需要移除的子串list
             base_string: 原始字符串
         Returns:
-            tuple: (ea_name, game, pider, page)
+            tuple: (ea_name, game, pider, page, item_type)
         """
         # 移除目标子串和空格
         for str_to_remove in str_to_remove_list:
@@ -301,6 +304,7 @@ class BattlefieldPluginLogic:
         game = None
         pider = ""
         page = 1
+        item_type = None
 
         # 分割参数
         parts = re.split(r"[，,]", clean_str)
@@ -315,7 +319,9 @@ class BattlefieldPluginLogic:
                     page = int(part[len("page="):])
                 except ValueError:
                     pass  # 忽略无效的页码
+            elif part.startswith("type="):
+                item_type = part[len("type="):]
             elif ea_name is None and part:
                 ea_name = part
 
-        return ea_name, game, pider, page
+        return ea_name, game, pider, page, item_type

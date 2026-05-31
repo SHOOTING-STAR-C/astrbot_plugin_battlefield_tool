@@ -35,7 +35,7 @@ class ApiHandlers:
         )
 
         async for result in self.plugin_logic.process_api_response(
-                event, api_data, data_type, request_data.game, self.html_render, is_llm
+                event, api_data, data_type, request_data.game, self.html_render, is_llm, request_data.item_type
         ):
             yield result
 
@@ -125,7 +125,8 @@ class ApiHandlers:
 
         async for result in self.plugin_logic.handle_btr_response(prop, request_data.game,
                                                                   self.html_render, stat_data, weapon_data,
-                                                                  vehicle_data, soldier_data, is_llm):
+                                                                  vehicle_data, soldier_data, is_llm,
+                                                                  request_data.item_type):
             yield result
 
     async def handle_btr_matches(self, event: AstrMessageEvent, request_data: PlayerDataRequest, provider,

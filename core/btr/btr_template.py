@@ -39,7 +39,8 @@ def sort_list_of_dicts(list_of_dicts, key):
     return sorted(filtered_list, key=lambda k: get_nested_value(k, key), reverse=True)
 
 
-async def btr_main_html_builder(stat_data: dict, weapons_data, vehicles_data, soldier_data, game: str) -> str:
+async def btr_main_html_builder(stat_data: dict, weapons_data, vehicles_data, soldier_data, game: str,
+                               item_type: str = None) -> str:
     """
         构建主要html
         Args:
@@ -48,6 +49,7 @@ async def btr_main_html_builder(stat_data: dict, weapons_data, vehicles_data, so
             vehicles_data: 查询到的载具数据字典
             soldier_data: 查询到的士兵数据字典
             game: 所查询的游戏
+            item_type: 武器/载具类型过滤（可选）
         Returns:
             构建的Html
     """
@@ -62,6 +64,13 @@ async def btr_main_html_builder(stat_data: dict, weapons_data, vehicles_data, so
     if game == "bf6":
         stat_entity = await PlayerStats.from_bf6_dict(stat_data)
 
+        # 如果指定了类型，过滤武器和载具数据
+        if item_type:
+            weapons_data = [w for w in weapons_data if item_type.lower() in Weapon._get_category(
+                w.get("metadata", {}).get("categoryName", "")).lower()]
+            vehicles_data = [v for v in vehicles_data if item_type.lower() in Vehicle._get_category(
+                v.get("metadata", {}).get("categoryName", "")).lower()]
+
         # 循环创建武器、载具、士兵对象列表
         weapons_entities = [await Weapon.from_bf6_dict(weapon_dict) for weapon_dict in weapons_data[:3]]
         vehicles_entities = [await Vehicle.from_bf6_dict(vehicle_dict) for vehicle_dict in vehicles_data[:3]]
@@ -71,6 +80,13 @@ async def btr_main_html_builder(stat_data: dict, weapons_data, vehicles_data, so
     else:
         banner = GameMappings.BANNERS.get(game, ImageUrls.BF2042_BANNER)
         stat_entity = PlayerStats.from_btr_dict(stat_data)
+
+        # 如果指定了类型，过滤武器和载具数据
+        if item_type:
+            weapons_data = [w for w in weapons_data if item_type.lower() in Weapon._get_category(
+                w.get("metadata", {}).get("category", "")).lower()]
+            vehicles_data = [v for v in vehicles_data if item_type.lower() in Vehicle._get_category(
+                v.get("metadata", {}).get("category", "")).lower()]
 
         # 循环创建武器、载具、士兵对象列表
         weapons_entities = [Weapon.from_btr_dict(weapon_dict) for weapon_dict in weapons_data[:3]]
@@ -93,7 +109,8 @@ async def btr_main_html_builder(stat_data: dict, weapons_data, vehicles_data, so
     return html
 
 
-async def btr_weapons_html_builder(stat_data: dict, weapons_data, vehicles_data, soldier_data, game: str) -> str:
+async def btr_weapons_html_builder(stat_data: dict, weapons_data, vehicles_data, soldier_data, game: str,
+                                  item_type: str = None) -> str:
     """
         构建武器html
         Args:
@@ -102,6 +119,7 @@ async def btr_weapons_html_builder(stat_data: dict, weapons_data, vehicles_data,
             vehicles_data: 查询到的载具数据字典
             soldier_data: 查询到的士兵数据字典
             game: 所查询的游戏
+            item_type: 武器类型过滤（可选）
         Returns:
             构建的Html
     """
@@ -111,6 +129,15 @@ async def btr_weapons_html_builder(stat_data: dict, weapons_data, vehicles_data,
     background_color = GameMappings.BACKGROUND_COLORS.get(game, BackgroundColors.BF2042_BACKGROUND_COLOR)
     accent_from, accent_to = GameMappings.ACCENT_COLORS.get(game, ("#f59e0b", "#ef4444"))
     update_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+    # 如果指定了类型，过滤武器数据
+    if item_type:
+        if game == "bf6":
+            weapons_data = [w for w in weapons_data if item_type.lower() in Weapon._get_category(
+                w.get("metadata", {}).get("categoryName", "")).lower()]
+        else:
+            weapons_data = [w for w in weapons_data if item_type.lower() in Weapon._get_category(
+                w.get("metadata", {}).get("category", "")).lower()]
 
     # 创建对象
     if game == "bf6":
@@ -141,7 +168,8 @@ async def btr_weapons_html_builder(stat_data: dict, weapons_data, vehicles_data,
     return html
 
 
-async def btr_vehicles_html_builder(stat_data: dict, weapons_data, vehicles_data, soldier_data, game: str) -> str:
+async def btr_vehicles_html_builder(stat_data: dict, weapons_data, vehicles_data, soldier_data, game: str,
+                                   item_type: str = None) -> str:
     """
         构建载具html
         Args:
@@ -150,6 +178,7 @@ async def btr_vehicles_html_builder(stat_data: dict, weapons_data, vehicles_data
             vehicles_data: 查询到的载具数据字典
             soldier_data: 查询到的士兵数据字典
             game: 所查询的游戏
+            item_type: 载具类型过滤（可选）
         Returns:
             构建的Html
     """
@@ -160,6 +189,15 @@ async def btr_vehicles_html_builder(stat_data: dict, weapons_data, vehicles_data
     background_color = GameMappings.BACKGROUND_COLORS.get(game, BackgroundColors.BF2042_BACKGROUND_COLOR)
     accent_from, accent_to = GameMappings.ACCENT_COLORS.get(game, ("#f59e0b", "#ef4444"))
     update_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+    # 如果指定了类型，过滤载具数据
+    if item_type:
+        if game == "bf6":
+            vehicles_data = [v for v in vehicles_data if item_type.lower() in Vehicle._get_category(
+                v.get("metadata", {}).get("categoryName", "")).lower()]
+        else:
+            vehicles_data = [v for v in vehicles_data if item_type.lower() in Vehicle._get_category(
+                v.get("metadata", {}).get("category", "")).lower()]
 
     # 创建对象
     if game == "bf6":

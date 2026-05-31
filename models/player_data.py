@@ -12,3 +12,4 @@ class PlayerDataRequest:
     server_name: Union[str, None]
     error_msg: Union[str, None]
     page: int = 1
+    item_type: Union[str, None] = None  # 武器/载具类型过滤

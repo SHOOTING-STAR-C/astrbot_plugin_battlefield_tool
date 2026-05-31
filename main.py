@@ -292,14 +292,20 @@ class BattlefieldTool(Star):
 示例: {prefix}stat ExamplePlayer,game=bf1
 
 4. 武器统计
-命令: {prefix}weapons [name],game=[游戏代号] 或 {prefix}武器 [name],game=[游戏代号]
-参数同上
-示例: {prefix}weapons ExamplePlayer,game=bfv
+命令: {prefix}weapons [name],game=[游戏代号],type=[类型] 或 {prefix}武器 [name],game=[游戏代号],type=[类型]
+参数:
+  name - EA账号名(可选，已绑定则可不填)
+  game - 游戏代号(可选)
+  type - 武器类型过滤(可选，如：突击步枪、狙击步枪、冲锋枪等)
+示例: {prefix}weapons ExamplePlayer,game=bfv,type=突击步枪
 
 5. 载具统计
-命令: {prefix}vehicles [name],game=[游戏代号] 或 {prefix}载具 [name],game=[游戏代号]
-参数同上
-示例: {prefix}vehicles ExamplePlayer
+命令: {prefix}vehicles [name],game=[游戏代号],type=[类型] 或 {prefix}载具 [name],game=[游戏代号],type=[类型]
+参数:
+  name - EA账号名(可选，已绑定则可不填)
+  game - 游戏代号(可选)
+  type - 载具类型过滤(可选，如：地载、空载、旋翼等)
+示例: {prefix}vehicles ExamplePlayer,type=地载
 
 6. 士兵查询
 命令: {prefix}soldier [name],game=bf2042 或 {prefix}士兵 [name],game=bf2042

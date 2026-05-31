@@ -14,7 +14,7 @@ class BtrImageGenerator:
         self.img_quality = img_quality
     
     async def generate_main_btr_data_pic(self, game: str, html_render_func: Callable,
-                                    html_builder_func: Callable,stat_data,weapon_data,vehicle_data,soldier_data) -> str:
+                                    html_builder_func: Callable,stat_data,weapon_data,vehicle_data,soldier_data, item_type: str = None) -> str:
         """将查询的全部数据转为图片
         Args:
             game: 游戏代号
@@ -24,10 +24,11 @@ class BtrImageGenerator:
             weapon_data: 查询到的武器数据等
             vehicle_data: 查询到的载具数据等
             soldier_data: 查询到的士兵数据等
+            item_type: 武器/载具类型过滤（可选）
         Returns:
             返回生成的图片URL
         """
-        html = await html_builder_func(stat_data,weapon_data,vehicle_data,soldier_data, game)
+        html = await html_builder_func(stat_data,weapon_data,vehicle_data,soldier_data, game, item_type)
         url = await html_render_func(
             html,
             {},
@@ -41,7 +42,7 @@ class BtrImageGenerator:
         return url
 
     async def generate_weapons_btr_data_pic(self, game: str, html_render_func: Callable,
-                                            html_builder_func: Callable,stat_data,weapon_data,vehicle_data,soldier_data) -> str:
+                                            html_builder_func: Callable,stat_data,weapon_data,vehicle_data,soldier_data, item_type: str = None) -> str:
         """将查询的武器数据转为图片
         Args:
             game: 游戏代号
@@ -51,10 +52,11 @@ class BtrImageGenerator:
             weapon_data: 查询到的武器数据等
             vehicle_data: 查询到的载具数据等
             soldier_data: 查询到的士兵数据等
+            item_type: 武器类型过滤（可选）
         Returns:
             返回生成的图片URL
         """
-        html = await html_builder_func(stat_data,weapon_data,vehicle_data,soldier_data, game)
+        html = await html_builder_func(stat_data,weapon_data,vehicle_data,soldier_data, game, item_type)
         url = await html_render_func(
             html,
             {},
@@ -66,9 +68,9 @@ class BtrImageGenerator:
             },
         )
         return url
-    
+
     async def generate_vehicles_btr_data_pic(self, game: str, html_render_func: Callable,
-                                             html_builder_func: Callable,stat_data,weapon_data,vehicle_data,soldier_data) -> str:
+                                             html_builder_func: Callable,stat_data,weapon_data,vehicle_data,soldier_data, item_type: str = None) -> str:
         """将查询的载具数据转为图片
         Args:
             game: 游戏代号
@@ -78,10 +80,11 @@ class BtrImageGenerator:
             weapon_data: 查询到的武器数据等
             vehicle_data: 查询到的载具数据等
             soldier_data: 查询到的士兵数据等
+            item_type: 载具类型过滤（可选）
         Returns:
             返回生成的图片URL
         """
-        html = await html_builder_func(stat_data,weapon_data,vehicle_data,soldier_data, game)
+        html = await html_builder_func(stat_data,weapon_data,vehicle_data,soldier_data, game, item_type)
         url = await html_render_func(
             html,
             {},

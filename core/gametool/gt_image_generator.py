@@ -15,18 +15,19 @@ class GtImageGenerator:
         """
         self.img_quality = img_quality
     
-    async def generate_main_gt_data_pic(self, data: Dict[str, Any], game: str, html_render_func: Callable, 
-                                    html_builder_func: Callable) -> str:
+    async def generate_main_gt_data_pic(self, data: Dict[str, Any], game: str, html_render_func: Callable,
+                                    html_builder_func: Callable, item_type: str = None) -> str:
         """将查询的全部数据转为图片
         Args:
             data: 查询到的战绩数据等
             game: 游戏代号
             html_render_func: HTML渲染函数
             html_builder_func: HTML构建函数
+            item_type: 武器/载具类型过滤（可选）
         Returns:
             返回生成的图片URL
         """
-        html = await html_builder_func(data, game)
+        html = await html_builder_func(data, game, item_type)
         url = await html_render_func(
             html,
             {},
@@ -38,19 +39,20 @@ class GtImageGenerator:
             },
         )
         return url
-    
+
     async def generate_weapons_gt_data_pic(self, data: Dict[str, Any], game: str, html_render_func: Callable,
-                                       html_builder_func: Callable) -> str:
+                                       html_builder_func: Callable, item_type: str = None) -> str:
         """将查询的武器数据转为图片
         Args:
             data: 查询到的武器数据等
             game: 游戏代号
             html_render_func: HTML渲染函数
             html_builder_func: HTML构建函数
+            item_type: 武器类型过滤（可选）
         Returns:
             返回生成的图片URL
         """
-        html = await html_builder_func(data, game)
+        html = await html_builder_func(data, game, item_type)
         url = await html_render_func(
             html,
             {},
@@ -62,19 +64,20 @@ class GtImageGenerator:
             },
         )
         return url
-    
+
     async def generate_vehicles_gt_data_pic(self, data: Dict[str, Any], game: str, html_render_func: Callable,
-                                        html_builder_func: Callable) -> str:
+                                        html_builder_func: Callable, item_type: str = None) -> str:
         """将查询的载具数据转为图片
         Args:
             data: 查询到的载具数据等
             game: 游戏代号
             html_render_func: HTML渲染函数
             html_builder_func: HTML构建函数
+            item_type: 载具类型过滤（可选）
         Returns:
             返回生成的图片URL
         """
-        html = await html_builder_func(data, game)
+        html = await html_builder_func(data, game, item_type)
         url = await html_render_func(
             html,
             {},

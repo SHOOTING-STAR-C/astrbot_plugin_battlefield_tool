@@ -23,33 +23,56 @@ def sort_list_of_dicts(list_of_dicts, key):
     return sorted(list_of_dicts, key=lambda k: k[key], reverse=True)
 
 
-def prepare_weapons_data(d: dict, lens: int, game: str) -> List[Weapon]:
-    """提取武器数据，格式化使用时间，并返回 Weapon 对象列表"""
+def prepare_weapons_data(d: dict, lens: int, game: str, item_type: str = None) -> List[Weapon]:
+    """提取武器数据，格式化使用时间，并返回 Weapon 对象列表
+    Args:
+        d: 原始数据字典
+        lens: 返回数量限制
+        game: 游戏代号
+        item_type: 武器类型过滤（可选）
+    """
     weapons_list_raw = d.get("weapons", [])
     weapons_list_raw = sort_list_of_dicts(weapons_list_raw, "kills")
 
     weapons_objects = []
-    for w_data in weapons_list_raw[:lens]:
+    for w_data in weapons_list_raw:
         if w_data.get("kills", 0) > 0:
+            # 如果指定了类型，进行过滤
+            if item_type and item_type.lower() not in w_data.get("type", "").lower():
+                continue
             # 创建 Weapon 对象
             weapon = Weapon.from_dict(w_data)
             weapons_objects.append(weapon)
+            # 达到数量限制后停止
+            if len(weapons_objects) >= lens:
+                break
 
     return weapons_objects
 
-def prepare_vehicles_data(d: dict, lens: int) -> List[Vehicle]:
-    """提取载具数据，格式化使用时间，并返回 Vehicle 对象列表"""
+def prepare_vehicles_data(d: dict, lens: int, item_type: str = None) -> List[Vehicle]:
+    """提取载具数据，格式化使用时间，并返回 Vehicle 对象列表
+    Args:
+        d: 原始数据字典
+        lens: 返回数量限制
+        item_type: 载具类型过滤（可选）
+    """
     vehicles_list_raw = d.get("vehicles", [])
     vehicles_list_raw = sort_list_of_dicts(vehicles_list_raw, "kills")
 
     vehicles_objects = []
-    for v_data in vehicles_list_raw[:lens]:
+    for v_data in vehicles_list_raw:
         if v_data.get("kills", 0) > 0:
+            # 如果指定了类型，进行过滤
+            if item_type and item_type.lower() not in v_data.get("type", "").lower():
+                continue
             # 处理图片URL
             v_data["image"] = img_repair_vehicles(v_data.get("vehicleName", "").lower(), v_data.get("image", ""))
             # 创建 Vehicle 对象
             vehicle = Vehicle.from_dict(v_data)
             vehicles_objects.append(vehicle)
+            # 达到数量限制后停止
+            if len(vehicles_objects) >= lens:
+                break
 
     return vehicles_objects
 
@@ -62,12 +85,13 @@ def img_repair_vehicles(item_name:str,url:str):
 
 
 
-async def gt_main_html_builder(raw_data: dict, game: str) -> str:
+async def gt_main_html_builder(raw_data: dict, game: str, item_type: str = None) -> str:
     """
     构建主要html
     Args:
         raw_data: 查询到的原始数据字典
         game: 所查询的游戏
+        item_type: 武器/载具类型过滤（可选）
     Returns:
         构建的Html
     """
@@ -92,8 +116,8 @@ async def gt_main_html_builder(raw_data: dict, game: str) -> str:
     update_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(processed_data["__update_time"]))
 
     # 整理武器和载具数据，返回实体对象列表
-    weapons_objects = prepare_weapons_data(processed_data, 3, game)
-    vehicles_objects = prepare_vehicles_data(processed_data, 3)
+    weapons_objects = prepare_weapons_data(processed_data, 3, game, item_type)
+    vehicles_objects = prepare_vehicles_data(processed_data, 3, item_type)
 
     html = MAIN_TEMPLATE.render(
         banner=banner,
@@ -109,12 +133,13 @@ async def gt_main_html_builder(raw_data: dict, game: str) -> str:
     return html
 
 
-async def gt_weapons_html_builder(raw_data: dict, game: str) -> str:
+async def gt_weapons_html_builder(raw_data: dict, game: str, item_type: str = None) -> str:
     """
     构建武器html
     Args:
         raw_data: 查询到的原始数据字典
         game: 所查询的游戏
+        item_type: 武器类型过滤（可选）
     Returns:
         构建的Html
     """
@@ -140,7 +165,7 @@ async def gt_weapons_html_builder(raw_data: dict, game: str) -> str:
     update_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(processed_data["__update_time"]))
 
     # 整理武器数据，返回实体对象列表
-    weapons_objects = prepare_weapons_data(processed_data, 50, game)
+    weapons_objects = prepare_weapons_data(processed_data, 50, game, item_type)
 
     html = WEAPONS_TEMPLATE.render(
         banner=banner,
@@ -155,12 +180,13 @@ async def gt_weapons_html_builder(raw_data: dict, game: str) -> str:
     return html
 
 
-async def gt_vehicles_html_builder(raw_data: dict, game: str) -> str:
+async def gt_vehicles_html_builder(raw_data: dict, game: str, item_type: str = None) -> str:
     """
     构建载具html
     Args:
         raw_data: 查询到的原始数据字典
         game: 所查询的游戏
+        item_type: 载具类型过滤（可选）
     Returns:
         构建的Html
     """
@@ -186,7 +212,7 @@ async def gt_vehicles_html_builder(raw_data: dict, game: str) -> str:
     update_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(processed_data["__update_time"]))
 
     # 整理载具数据，返回实体对象列表
-    vehicles_objects = prepare_vehicles_data(processed_data, 50)
+    vehicles_objects = prepare_vehicles_data(processed_data, 50, item_type)
 
     html = VEHICLES_TEMPLATE.render(
         banner=banner,
