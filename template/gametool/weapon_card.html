@@ -1,59 +1,56 @@
-{% macro weapon_card(w,game, bg_opacity_class) %}
-<div class="flex grid grid-cols-6 gap-2 p-4 rounded-lg bg-gray-800 {{ bg_opacity_class }}">
-    {% if game != 'bf4' %}
-    <div class=" col-span-2 row-span-2 flex flex-col justify-center items-center">
-        <img src="{{ w.image }}" class="object-scale-down" style="height:90px;width:200px;" />
-        {{ w.name }}
+{% macro weapon_card(w, game) %}
+<div class="item-row">
+    <div class="flex-shrink-0 w-28 flex flex-col items-center justify-center">
+        {% if game != 'bf4' %}
+        <img src="{{ w.image }}" class="object-contain" style="height: 40px; max-width: 100px;" />
+        {% else %}
+        <img src="{{ w.image }}" class="object-contain" style="height: 30px; max-width: 80px;" />
+        {% endif %}
+        <div class="text-sm mt-1 text-white truncate text-center" style="max-width: 100px;">{{ w.name }}</div>
         {% if w.kills // 100 > 0 %}
-            <div class="flex mt-1 text-yellow-500">
-                ⭐ x {{ w.kills // 100 }}
-            </div>
+        <div class="text-yellow-500 text-xs mt-0.5">⭐ x {{ w.kills // 100 }}</div>
         {% endif %}
     </div>
-    {% else %}
-    <div class=" col-span-2 row-span-2 flex flex-col justify-center items-center">
-        <img src="{{ w.image }}" class="object-scale-down" style="height:50px;width:140px;" />
-        {{ w.name }}
-        {% if w.kills // 100 > 0 %}
-            <div class="flex mt-1 text-yellow-500">
-                ⭐ x {{ w.kills // 100 }}
+
+    <div class="flex-1">
+        <div class="grid grid-cols-4 gap-2 text-center">
+            <div>
+                <div class="text-sm label uppercase tracking-wider">击杀</div>
+                <div class="text-xl font-bold font-mono text-white mt-0.5">{{ w.kills }}</div>
             </div>
+            <div>
+                <div class="text-sm label uppercase tracking-wider">KPM</div>
+                <div class="text-xl font-bold font-mono gradient-text mt-0.5">{{ w.kills_per_minute }}</div>
+            </div>
+            <div>
+                <div class="text-sm label uppercase tracking-wider">爆头率</div>
+                <div class="text-xl font-bold font-mono text-white mt-0.5">{{ w.headshots }}</div>
+            </div>
+            <div>
+                <div class="text-sm label uppercase tracking-wider">命中率</div>
+                <div class="text-xl font-bold font-mono text-white mt-0.5">{{ w.accuracy }}</div>
+            </div>
+        </div>
+        {% if game != 'bf4' %}
+        <div class="grid grid-cols-4 gap-2 text-center mt-2 pt-2 border-t border-white/10">
+            <div>
+                <div class="text-sm label uppercase tracking-wider">使用时间</div>
+                <div class="text-base font-bold font-mono text-white mt-0.5">{{ w.time_spent }}h</div>
+            </div>
+            <div>
+                <div class="text-sm label uppercase tracking-wider">击发数</div>
+                <div class="text-base font-bold font-mono text-white mt-0.5">{{ w.shotsFired }}</div>
+            </div>
+            <div>
+                <div class="text-sm label uppercase tracking-wider">爆头击杀</div>
+                <div class="text-base font-bold font-mono text-white mt-0.5">{{ w.headshotKills }}</div>
+            </div>
+            <div>
+                <div class="text-sm label uppercase tracking-wider">命中数</div>
+                <div class="text-base font-bold font-mono text-white mt-0.5">{{ w.shotsHit }}</div>
+            </div>
+        </div>
         {% endif %}
     </div>
-    {% endif %}
-    <div>
-        <div class="text-1xl text-yellow-400">击杀</div>
-        <div class="text-2xl font-bold font-mono">{{ w.kills }}</div>
-    </div>
-    <div>
-        <div class="text-1xl text-yellow-400">KPM</div>
-        <div class="text-2xl font-bold font-mono">{{ w.kills_per_minute }}</div>
-    </div>
-    <div>
-        <div class="text-1xl text-yellow-400">爆头率</div>
-        <div class="text-2xl font-bold font-mono">{{ w.headshots }}</div>
-    </div>
-    <div>
-        <div class="text-1xl text-yellow-400">命中率</div>
-        <div class="text-2xl font-bold font-mono">{{ w.accuracy }}</div>
-    </div>
-    {% if game != 'bf4' %}
-    <div>
-        <div class="text-1xl text-yellow-400">使用时间</div>
-        <div class="text-2xl font-bold font-mono">{{ w.time_spent }}h</div>
-    </div>
-    <div>
-        <div class="text-1xl text-yellow-400">击发数</div>
-        <div class="text-2xl font-bold font-mono">{{ w.shotsFired }}</div>
-    </div>
-    <div>
-        <div class="text-1xl text-yellow-400">爆头击杀</div>
-        <div class="text-2xl font-bold font-mono">{{ w.headshotKills }}</div>
-    </div>
-    <div>
-        <div class="text-1xl text-yellow-400">命中数</div>
-        <div class="text-2xl font-bold font-mono">{{ w.shotsHit }}</div>
-    </div>
-    {% endif %}
 </div>
 {% endmacro %}

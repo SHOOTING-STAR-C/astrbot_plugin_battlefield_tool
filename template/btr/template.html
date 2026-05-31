@@ -25,17 +25,92 @@
             font-weight: 400;
             width: 700px;
         }
-
-        h2 {
-            font-size: 1.4em;
-            font-weight: 700;
-            margin: 10px 20px 10px;
-            text-align: center;
-        }
     </style>
     <style>
         :root {
             --bg-color: {{ background_color }};
+            --accent-from: {{ accent_from | default('#f59e0b') }};
+            --accent-to: {{ accent_to | default('#ef4444') }};
+        }
+
+        .glass-card {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+        .glass-card:hover {
+            background: rgba(0, 0, 0, 0.25);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .stat-pill {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        .stat-pill:hover {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .avatar-ring {
+            background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+            padding: 3px;
+            border-radius: 16px;
+        }
+
+        .label { color: var(--accent-from); }
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            margin: 8px 20px;
+        }
+
+        .item-row {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+        .item-row:hover {
+            background: rgba(0, 0, 0, 0.22);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .tag-green {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .tag-gray {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
@@ -46,197 +121,225 @@
         'bf6': 'bg-opacity-10',
     } %}
     {% set current_bg_opacity_class = bg_opacity_map.get(game, 'bg-opacity-10') %}
-    {% set card_bg_color_map = {
-        'bf2042': '30',
-        'bf6': '20',
-    } %}
-    {% set current_card_bg_color = card_bg_color_map.get(game, 'gray-600') %}
 
-    <div class="bg-cover relative" style="background-image: url('{{ banner }}'); height: 310px;">
-        <div class="absolute inset-0 bg-gradient-to-b from-dynamicBg/0 via-dynamicBg/10 to-dynamicBg/40"></div>
-        <div class="relative z-10 flex flex-col items-center justify-center pt-10 pb-10">
-            <img src="{{ stat_entity.avatar }}" alt="avatar" class="rounded-lg w-32 h-32 object-cover border-2 border-gray-700" />
-            <div class="font-bold text-4xl mt-2">{{ stat_entity.user_name }}</div>
-            <div class="flex items-center font-semibold text-gray-200 mt-1">
-                {% if game == 'bf6' %}
-                <img src="{{ stat_entity.rank_img }}" width="25px" class="mr-1" alt="等级IMG"/>
-                {% endif %}
-                等级 {{ stat_entity.level }}
+    <!-- ===== Banner 区域 ===== -->
+    <div class="relative overflow-hidden" style="height: 320px;">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ banner }}');"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-dynamicBg"></div>
+
+        <div class="relative z-10 flex flex-col items-center justify-center h-full pb-4">
+            <div class="avatar-ring shadow-lg shadow-black/30">
+                <img src="{{ stat_entity.avatar }}" alt="avatar"
+                     class="rounded-[13px] w-28 h-28 object-cover" />
             </div>
-            <div class="font-semibold text-gray-200 mt-1">游戏时间：{{ stat_entity.hours_played }}h</div>
+            <div class="font-bold text-4xl mt-3 tracking-wide drop-shadow-lg">
+                {{ stat_entity.user_name }}
+            </div>
+            <div class="flex items-center gap-4 mt-2">
+                <div class="flex items-center gap-1.5 bg-black/30 rounded-full px-3 py-1 backdrop-blur-sm">
+                    {% if game == 'bf6' %}
+                    <img src="{{ stat_entity.rank_img }}" width="18px" class="opacity-90" alt="等级IMG"/>
+                    {% endif %}
+                    <span class="text-base font-semibold text-white">Lv.{{ stat_entity.level }}</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-black/30 rounded-full px-3 py-1 backdrop-blur-sm">
+                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="text-base font-semibold text-white">{{ stat_entity.hours_played }}h</span></span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <h2 class="text-white">基本信息</h2>
-    <div class="flex flex-row gap-4 justify-around flex-wrap mx-5 p-4 rounded-lg bg-gray-800 {{ current_bg_opacity_class }}">
-        <div class="text-center p-4 rounded-lg bg-gray-600/{{current_card_bg_color}} w-32">
-            {% if game == 'bf6' %}
-                <div class="text-sm text-yellow-400">击杀玩家</div>
-                <div class="text-2xl font-bold font-mono text-white">{{ stat_entity.player_kills }}</div>
-                {% if stat_entity.player_kills_percentile < 30 %}
-                <div class="text-xs text-green-400">Top {{stat_entity.player_kills_percentile}}%</div>
-                {% elif stat_entity.player_kills_percentile < 60 %}
-                <div class="text-xs text-gray-400">Top {{stat_entity.player_kills_percentile}}%</div>
+    <!-- ===== 核心数据（大卡片） ===== -->
+    <div class="px-5 -mt-2 relative z-20">
+        <div class="glass-card p-5">
+            <div class="flex justify-around">
+                {% if game == 'bf6' %}
+                <div class="text-center px-3">
+                    <div class="text-sm label font-medium uppercase tracking-wider">击杀玩家</div>
+                    <div class="text-3xl font-bold font-mono gradient-text">{{ stat_entity.player_kills }}</div>
+                    {% if stat_entity.player_kills_percentile < 30 %}
+                    <div class="tag tag-green mt-1">Top {{stat_entity.player_kills_percentile}}%</div>
+                    {% elif stat_entity.player_kills_percentile < 60 %}
+                    <div class="tag tag-gray mt-1">Top {{stat_entity.player_kills_percentile}}%</div>
+                    {% endif %}
+                </div>
                 {% endif %}
-            {% endif %}
-            {% if game == 'bf2042' %}
-                <div class="text-sm text-yellow-400">击杀</div>
-                <div class="text-2xl font-bold font-mono text-white">{{ stat_entity.kills }}</div>
-                {% if stat_entity.kills_percentile < 30 %}
-                <div class="text-xs text-green-400">Top {{stat_entity.kills_percentile}}%</div>
-                {% elif stat_entity.kills_percentile < 60 %}
-                <div class="text-xs text-gray-400">Top {{stat_entity.kills_percentile}}%</div>
+                {% if game == 'bf2042' %}
+                <div class="text-center px-3">
+                    <div class="text-sm label font-medium uppercase tracking-wider">击杀</div>
+                    <div class="text-3xl font-bold font-mono gradient-text">{{ stat_entity.kills }}</div>
+                    {% if stat_entity.kills_percentile < 30 %}
+                    <div class="tag tag-green mt-1">Top {{stat_entity.kills_percentile}}%</div>
+                    {% elif stat_entity.kills_percentile < 60 %}
+                    <div class="tag tag-gray mt-1">Top {{stat_entity.kills_percentile}}%</div>
+                    {% endif %}
+                </div>
                 {% endif %}
+                <div class="text-center px-3">
+                    <div class="text-sm label font-medium uppercase tracking-wider">对玩家K/D</div>
+                    <div class="text-3xl font-bold font-mono gradient-text">{{ stat_entity.human_kd_ratio }}</div>
+                    {% if stat_entity.human_kd_ratio_percentile < 30 %}
+                    <div class="tag tag-green mt-1">Top {{ stat_entity.human_kd_ratio_percentile }}%</div>
+                    {% elif stat_entity.human_kd_ratio_percentile < 60 %}
+                    <div class="tag tag-gray mt-1">Top {{ stat_entity.human_kd_ratio_percentile }}%</div>
+                    {% endif %}
+                </div>
+                <div class="text-center px-3">
+                    <div class="text-sm label font-medium uppercase tracking-wider">KPM</div>
+                    <div class="text-3xl font-bold font-mono gradient-text">{{ stat_entity.kills_per_minute }}</div>
+                    {% if stat_entity.kills_per_minute_percentile < 30 %}
+                    <div class="tag tag-green mt-1">Top {{ stat_entity.kills_per_minute_percentile }}%</div>
+                    {% elif stat_entity.kills_per_minute_percentile < 60 %}
+                    <div class="tag tag-gray mt-1">Top {{ stat_entity.kills_per_minute_percentile }}%</div>
+                    {% endif %}
+                </div>
+                <div class="text-center px-3">
+                    <div class="text-sm label font-medium uppercase tracking-wider">DPM</div>
+                    <div class="text-3xl font-bold font-mono gradient-text">{{ stat_entity.dmg_per_min }}</div>
+                    {% if stat_entity.dmg_per_min_percentile < 30 %}
+                    <div class="tag tag-green mt-1">Top {{ stat_entity.dmg_per_min_percentile }}%</div>
+                    {% elif stat_entity.dmg_per_min_percentile < 60 %}
+                    <div class="tag tag-gray mt-1">Top {{ stat_entity.dmg_per_min_percentile }}%</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 详细统计（小标签网格） ===== -->
+    <div class="px-5 mt-3">
+        <div class="glass-card p-4">
+            <div class="text-xs label uppercase tracking-widest mb-3 font-semibold px-1">详细数据</div>
+            <div class="grid grid-cols-5 gap-2">
+                {% if game == 'bf6' %}
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">总击杀</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.kills }}</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">总得分</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.score }}</div>
+                </div>
+                {% endif %}
+                {% if game == 'bf2042' %}
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">K/D</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.kill_death }}</div>
+                </div>
+                {% endif %}
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">总伤害</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.damage_dealt }}</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">爆头率</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.headshot_percentage }}</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">助攻</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.assists }}</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">场均击杀</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.kills_per_match }}</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">急救</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.revives }}</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">胜率</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.wl_percentage }}</div>
+                </div>
+                {% if game == 'bf2042' %}
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">场均伤害</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.damage_per_match }}</div>
+                </div>
+                {% endif %}
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">死亡</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.deaths }}</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="text-xs label uppercase">载具破坏</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ stat_entity.vehicles_destroyed }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 士兵信息 ===== -->
+    <div class="px-5 mt-4">
+        <div class="flex items-center gap-2 mb-3 px-1">
+            <div class="w-1 h-5 rounded-full" style="background: linear-gradient(to bottom, var(--accent-from), var(--accent-to));"></div>
+            <h2 class="text-sm font-bold uppercase tracking-widest label">士兵信息</h2>
+        </div>
+        <div class="flex flex-col gap-2">
+            {% from "soldier_card.html" import soldier_card %}
+            {% if soldier_data is not none %}
+            {% for soldier in soldier_data %}
+            {{ soldier_card(soldier_entity=soldier, game=game, bg_opacity_class=current_bg_opacity_class) }}
+            {% endfor %}
+            {% else %}
+            <div class="glass-card text-center text-white/70 py-6 text-sm">暂无士兵数据</div>
             {% endif %}
         </div>
-        <div class="text-center p-4 rounded-lg bg-gray-600/{{current_card_bg_color}} w-32">
-            <div class="text-sm text-yellow-400">对玩家K/D</div>
-            <div class="text-2xl font-bold font-mono text-white">{{ stat_entity.human_kd_ratio }}</div>
-            {% if stat_entity.human_kd_ratio_percentile < 30 %}
-            <div class="text-xs text-green-400">Top {{ stat_entity.human_kd_ratio_percentile }}%</div>
-            {% elif stat_entity.human_kd_ratio_percentile < 60 %}
-            <div class="text-xs text-gray-400">Top {{ stat_entity.human_kd_ratio_percentile }}%</div>
+        <div class="text-center text-white/60 text-xs mt-2">
+            使用 <span class="text-cyan-400 font-mono">soldiers [玩家id],game={{ game }}</span> 查看更多
+        </div>
+    </div>
+
+    <!-- ===== 武器信息 ===== -->
+    <div class="px-5 mt-4">
+        <div class="flex items-center gap-2 mb-3 px-1">
+            <div class="w-1 h-5 rounded-full" style="background: linear-gradient(to bottom, var(--accent-from), var(--accent-to));"></div>
+            <h2 class="text-sm font-bold uppercase tracking-widest label">武器信息</h2>
+        </div>
+        <div class="flex flex-col gap-2">
+            {% from "weapon_card.html" import weapon_card %}
+            {% if weapon_data is not none %}
+            {% for weapon in weapon_data %}
+            {{ weapon_card(weapon_entity=weapon, game=game, bg_opacity_class=current_bg_opacity_class) }}
+            {% endfor %}
+            {% else %}
+            <div class="glass-card text-center text-white/70 py-6 text-sm">暂无武器数据</div>
             {% endif %}
         </div>
-        <div class="text-center p-4 rounded-lg bg-gray-600/{{current_card_bg_color}} w-32">
-            <div class="text-sm text-yellow-400">KPM</div>
-            <div class="text-2xl font-bold font-mono text-white">{{ stat_entity.kills_per_minute }}</div>
-            {% if stat_entity.kills_per_minute_percentile < 30 %}
-            <div class="text-xs text-green-400">Top {{ stat_entity.kills_per_minute_percentile }}%</div>
-            {% elif stat_entity.kills_per_minute_percentile < 60 %}
-            <div class="text-xs text-gray-400">Top {{ stat_entity.kills_per_minute_percentile }}%</div>
+        <div class="text-center text-white/60 text-xs mt-2">
+            使用 <span class="text-cyan-400 font-mono">weapons [玩家id],game={{ game }}</span> 查看更多
+        </div>
+    </div>
+
+    <!-- ===== 载具信息 ===== -->
+    <div class="px-5 mt-4 mb-2">
+        <div class="flex items-center gap-2 mb-3 px-1">
+            <div class="w-1 h-5 rounded-full" style="background: linear-gradient(to bottom, var(--accent-from), var(--accent-to));"></div>
+            <h2 class="text-sm font-bold uppercase tracking-widest label">载具信息</h2>
+        </div>
+        <div class="flex flex-col gap-2">
+            {% from "vehicle_card.html" import vehicle_card %}
+            {% if vehicle_data is not none %}
+            {% for vehicle in vehicle_data %}
+            {{ vehicle_card(vehicle_entity=vehicle, game=game, bg_opacity_class=current_bg_opacity_class) }}
+            {% endfor %}
+            {% else %}
+            <div class="glass-card text-center text-white/70 py-6 text-sm">暂无载具数据</div>
             {% endif %}
         </div>
-        <div class="text-center p-4 rounded-lg bg-gray-600/{{current_card_bg_color}} w-32">
-            <div class="text-sm text-yellow-400">DPM</div>
-            <div class="text-2xl font-bold font-mono text-white">{{ stat_entity.dmg_per_min }}</div>
-            {% if stat_entity.dmg_per_min_percentile < 30 %}
-            <div class="text-xs text-green-400">Top {{ stat_entity.dmg_per_min_percentile }}%</div>
-            {% elif stat_entity.dmg_per_min_percentile < 60 %}
-            <div class="text-xs text-gray-400">Top {{ stat_entity.dmg_per_min_percentile }}%</div>
-            {% endif %}
+        <div class="text-center text-white/60 text-xs mt-2">
+            使用 <span class="text-cyan-400 font-mono">vehicles [玩家id],game={{ game }}</span> 查看更多
         </div>
     </div>
 
-    <div class="mb-4"></div>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mx-5 p-4 rounded-lg bg-gray-800 {{ current_bg_opacity_class }}">
-        {% if game == 'bf6' %}
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">总击杀</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.kills }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">总得分</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.score }}</div>
-        </div>
-        {% endif %}
-        {% if game == 'bf2042' %}
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">K/D</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.kill_death }}</div>
-        </div>
-        {% endif %}
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">总伤害</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.damage_dealt }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">爆头率</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.headshot_percentage }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">助攻</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.assists }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">场均击杀</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.kills_per_match }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">急救</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.revives }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">胜率</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.wl_percentage }}</div>
-        </div>
-        {% if game == 'bf2042' %}
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">场均伤害</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.damage_per_match }}</div>
-        </div>
-        {% endif %}
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">死亡</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.deaths }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">载具破坏</div>
-            <div class="text-2xl font-bold font-mono">{{ stat_entity.vehicles_destroyed }}</div>
-        </div>
-    </div>
-
-<!--    <h2 class="text-white">士兵信息</h2>-->
-    <div class="mb-4"></div>
-    <div class="flex flex-col gap-4 mx-5">
-        {% from "soldier_card.html" import soldier_card %}
-        {% if soldier_data is not none %}
-        {% for soldier in soldier_data %}
-        {{ soldier_card(soldier_entity=soldier, game=game, bg_opacity_class=current_bg_opacity_class) }}
-        {% endfor %}
-        {% else %}
-        <div class="text-center text-slate-400 py-4">暂无载具数据</div>
-        {% endif %}
-        <div class="text-center text-slate-400 text-sm mt-1">
-            使用
-            <span class="text-cyan-300 font-mono">
-                soldiers [玩家id],game={{ game }}
-            </span>
-            查看更多数据
-        </div>
-    </div>
-    <h2 class="text-white">武器信息</h2>
-    <div class="flex flex-col gap-4 mx-5">
-        {% from "weapon_card.html" import weapon_card %}
-        {% if weapon_data is not none %}
-        {% for weapon in weapon_data %}
-        {{ weapon_card(weapon_entity=weapon,game=game, bg_opacity_class=current_bg_opacity_class) }}
-        {% endfor %}
-        {% else %}
-        <div class="text-center text-slate-400 py-4">暂无武器数据</div>
-        {% endif %}
-        <div class="text-center text-slate-400 text-sm mt-2">
-            使用
-            <span class="text-cyan-300 font-mono">
-                weapons [玩家id],game={{ game }}
-            </span>
-            查看更多数据
-        </div>
-    </div>
-
-    <h2 class="text-white">载具信息</h2>
-    <div class="flex flex-col gap-4 mx-5">
-        {% from "vehicle_card.html" import vehicle_card %}
-        {% if vehicle_data is not none %}
-        {% for vehicle in vehicle_data %}
-        {{ vehicle_card(vehicle_entity=vehicle, game=game, bg_opacity_class=current_bg_opacity_class) }}
-        {% endfor %}
-        {% else %}
-        <div class="text-center text-slate-400 py-4">暂无载具数据</div>
-        {% endif %}
-        <div class="text-center text-slate-400 text-sm mt-1">
-            使用
-            <span class="text-cyan-300 font-mono">
-                vehicles [玩家id],game={{ game }}
-            </span>
-            查看更多数据
-        </div>
-    </div>
-
-
-    <div class="flex flex-col justify-center items-center text-slate-400 py-3">
-        <span>powered by astrbot</span>
-        <span>数据更新时间：{{ update_time }}</span>
+    <!-- ===== 底部 ===== -->
+    <div class="flex flex-col items-center text-white/60 py-4 mt-2">
+        <div class="section-divider w-2/3 mb-3"></div>
+        <span class="text-xs tracking-wider uppercase">powered by astrbot</span>
+        <span class="text-[10px] mt-0.5 text-white/50">数据更新时间：{{ update_time }}</span>
     </div>
 </body>
 

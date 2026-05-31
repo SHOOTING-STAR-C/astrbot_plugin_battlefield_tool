@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <meta name="viewport" content="width=700px,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
     <title></title>
     <script>
@@ -29,38 +29,72 @@
     <style>
         :root {
             --bg-color: {{ background_color }};
+            --accent-from: {{ accent_from | default('#f59e0b') }};
+            --accent-to: {{ accent_to | default('#ef4444') }};
+        }
+
+        .glass-card {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+        }
+
+        .item-row {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+        .item-row:hover {
+            background: rgba(0, 0, 0, 0.22);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .label { color: var(--accent-from); }
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            margin: 8px 20px;
         }
     </style>
 </head>
 
 <body>
-    {% set bg_opacity_map = {
-        'bf1': 'bg-opacity-10',
-        'bf4': 'bg-opacity-30',
-        'bfv': 'bg-opacity-25'
-    } %}
-    {% set current_bg_opacity_class = bg_opacity_map.get(game, 'bg-opacity-10') %}
-
-    <div class="bg-cover" style="background-image: url('{{ banner }}'); height: 260px;">
-        <div class="absolute inset-0 bg-gradient-to-b from-dynamicBg/0 via-dynamicBg/10 to-dynamicBg/40"></div>
-    <div class="relative z-10 flex flex-col items-center justify-center h-full">
-            <img src="{{ logo }}" alt="logo" class="rounded-lg" style="width:  280px;" />
-            <div class="font-bold text-3xl">服务器列表</div>
+    <!-- Banner -->
+    <div class="relative overflow-hidden" style="height: 260px;">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ banner }}');"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-dynamicBg"></div>
+        <div class="relative z-10 flex flex-col items-center justify-center h-full">
+            <img src="{{ logo }}" alt="logo" class="rounded-lg drop-shadow-lg" style="width: 260px;" />
+            <div class="font-bold text-3xl mt-2 drop-shadow-lg">服务器列表</div>
         </div>
     </div>
-    <div class="flex flex-col gap-4 mx-5" style="margin-top: 1rem;">
-        {% from "server_card.html" import server_card %}
-        {% if servers_data is not none %}
-        {% for server in servers_data %}
-        {{ server_card(server, game, current_bg_opacity_class) }}
-        {% endfor %}
-        {% else %}
-        <div class="text-center text-slate-400">暂无服务器</div>
-        {% endif %}
+
+    <!-- 服务器列表 -->
+    <div class="px-5 mt-4 mb-2">
+        <div class="flex flex-col gap-2">
+            {% from "server_card.html" import server_card %}
+            {% if servers_data is not none %}
+            {% for server in servers_data %}
+            {{ server_card(server, game) }}
+            {% endfor %}
+            {% else %}
+            <div class="glass-card text-center text-white/60 py-6 text-sm">暂无服务器</div>
+            {% endif %}
+        </div>
     </div>
-    <div class="flex flex-col justify-center items-center text-slate-400 py-3">
-        <span>powered by astrbot</span>
-        <span>数据更新时间：{{ update_time }}</span>
+
+    <!-- 底部 -->
+    <div class="flex flex-col items-center text-white/60 py-4 mt-2">
+        <div class="section-divider w-2/3 mb-3"></div>
+        <span class="text-xs tracking-wider uppercase">powered by astrbot</span>
+        <span class="text-[10px] mt-0.5 text-white/50">数据更新时间：{{ update_time }}</span>
     </div>
 </body>
 

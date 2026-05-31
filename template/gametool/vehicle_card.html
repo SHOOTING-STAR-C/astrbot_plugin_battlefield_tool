@@ -1,29 +1,30 @@
-{% macro vehicle_card(v, game, bg_opacity_class) %}
-<div class="flex items-center grid grid-cols-6 gap-2 p-4 rounded-lg bg-gray-800 {{ bg_opacity_class }}">
-    <div class="col-span-2 row-span-2 flex flex-col justify-center items-center">
-        <img src="{{ v.image }}" class="object-scale-down" style="height:50px;width:150px;" />
-        {{ v.name }}
+{% macro vehicle_card(v, game) %}
+<div class="item-row">
+    <div class="flex-shrink-0 w-28 flex flex-col items-center justify-center">
+        <img src="{{ v.image }}" class="object-contain" style="height: 40px; max-width: 100px;" />
+        <div class="text-sm mt-1 text-white truncate text-center" style="max-width: 100px;">{{ v.name }}</div>
         {% if v.kills // 100 > 0 %}
-            <div class="flex mt-1 text-yellow-500">
-                ⭐ x {{ v.kills // 100 }}
-            </div>
+        <div class="text-yellow-500 text-xs mt-0.5">⭐ x {{ v.kills // 100 }}</div>
         {% endif %}
     </div>
-    <div>
-        <div class="text-1xl text-yellow-400">使用时间</div>
-        <div class="text-2xl font-bold font-mono">{{ v.time_spent }}h</div>
-    </div>
-    <div>
-        <div class="text-1xl text-yellow-400">击杀</div>
-        <div class="text-2xl font-bold font-mono">{{ v.kills }}</div>
-    </div>
-    <div>
-        <div class="text-1xl text-yellow-400">KPM</div>
-        <div class="text-2xl font-bold font-mono">{{ v.kills_per_minute }}</div>
-    </div>
-    <div>
-        <div class="text-1xl text-yellow-400">摧毁载具数</div>
-        <div class="text-2xl font-bold font-mono">{{ v.destroyed }}</div>
+
+    <div class="flex-1 flex items-center justify-around">
+        <div class="text-center">
+            <div class="text-sm label uppercase tracking-wider">使用时间</div>
+            <div class="text-xl font-bold font-mono text-white mt-0.5">{{ v.time_spent }}h</div>
+        </div>
+        <div class="text-center">
+            <div class="text-sm label uppercase tracking-wider">击杀</div>
+            <div class="text-xl font-bold font-mono text-white mt-0.5">{{ v.kills }}</div>
+        </div>
+        <div class="text-center">
+            <div class="text-sm label uppercase tracking-wider">KPM</div>
+            <div class="text-xl font-bold font-mono gradient-text mt-0.5">{{ v.kills_per_minute }}</div>
+        </div>
+        <div class="text-center">
+            <div class="text-sm label uppercase tracking-wider">摧毁载具</div>
+            <div class="text-xl font-bold font-mono text-white mt-0.5">{{ v.destroyed }}</div>
+        </div>
     </div>
 </div>
 {% endmacro %}

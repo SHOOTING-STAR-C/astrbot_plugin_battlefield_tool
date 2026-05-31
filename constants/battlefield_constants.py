@@ -819,6 +819,16 @@ class GameMappings:
         "bfv": ImageUrls.BFV_LOGO,
     }
 
+    # 强调色映射（渐变起止色）—— 选与背景色对比强烈的颜色
+    ACCENT_COLORS = {
+        "bf3": ("#22d3ee", "#a78bfa"),  # 青→紫，深蓝底
+        "bf4": ("#22d3ee", "#a78bfa"),  # 青→紫，深蓝底
+        "bf1": ("#fbbf24", "#fb923c"),  # 亮金→橙，棕底上醒目
+        "bfv": ("#fbbf24", "#f87171"),  # 金→红，蓝底上暖色突出
+        "bf2042": ("#fbbf24", "#fb923c"),  # 金→橙，青底上暖色突出
+        "bf6": ("#f59e0b", "#ef4444"),  # 琥珀→红，灰底
+    }
+
 
 class TemplateConstants:
     """模板常量类"""

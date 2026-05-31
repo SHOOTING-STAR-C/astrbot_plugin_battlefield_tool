@@ -25,126 +25,201 @@
             font-weight: 400;
             width: 700px;
         }
-
-        h2 {
-            font-size: 1.4em;
-            font-weight: 700;
-            margin: 10px 20px 10px;
-            text-align: center;
-        }
     </style>
     <style>
         :root {
             --bg-color: {{ background_color }};
+            --accent-from: {{ accent_from | default('#f59e0b') }};
+            --accent-to: {{ accent_to | default('#ef4444') }};
+        }
+
+        .glass-card {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+        .glass-card:hover {
+            background: rgba(0, 0, 0, 0.25);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .stat-pill {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        .stat-pill:hover {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .avatar-ring {
+            background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+            padding: 3px;
+            border-radius: 16px;
+        }
+
+        .label { color: var(--accent-from); }
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            margin: 8px 20px;
+        }
+
+        .item-row {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+        .item-row:hover {
+            background: rgba(0, 0, 0, 0.22);
+            border-color: rgba(255, 255, 255, 0.15);
         }
     </style>
 </head>
 
 <body>
-    {% set bg_opacity_map = {
-        'bf1': 'bg-opacity-10',
-        'bf4': 'bg-opacity-50',
-        'bfv': 'bg-opacity-25'
-    } %}
-    {% set current_bg_opacity_class = bg_opacity_map.get(game, 'bg-opacity-10') %}
+    <!-- ===== Banner 区域 ===== -->
+    <div class="relative overflow-hidden" style="height: 320px;">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ banner }}');"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-dynamicBg"></div>
 
-    <div class="bg-cover relative" style="background-image: url('{{ banner }}'); height: 310px;">
-        <div class="absolute inset-0 bg-gradient-to-b from-dynamicBg/0 via-dynamicBg/10 to-dynamicBg/40"></div>
-        <div class="relative z-10 flex flex-col items-center justify-center pt-10 pb-10">
-            <img src="{{ d.avatar }}" alt="avatar" class="rounded-lg w-32 h-32 object-cover border-2 border-gray-700" />
-            <div class="font-bold text-4xl mt-2">{{ d.user_name }}</div>
-            <div class="flex items-center font-semibold text-gray-200 mt-1">
-                <img src="{{ d.rank_img }}" width="32px" class="mr-1" />
-                等级 {{ d.rank }}
+        <div class="relative z-10 flex flex-col items-center justify-center h-full pb-4">
+            <div class="avatar-ring shadow-lg shadow-black/30">
+                <img src="{{ d.avatar }}" alt="avatar"
+                     class="rounded-[13px] w-28 h-28 object-cover" />
             </div>
-            <div class="font-semibold text-gray-200 mt-1">游戏时间：{{ d.hours_played }} h</div>
+            <div class="font-bold text-4xl mt-3 tracking-wide drop-shadow-lg">
+                {{ d.user_name }}
+            </div>
+            <div class="flex items-center gap-4 mt-2">
+                <div class="flex items-center gap-1.5 bg-black/30 rounded-full px-3 py-1 backdrop-blur-sm">
+                    <img src="{{ d.rank_img }}" width="18px" class="opacity-90" />
+                    <span class="text-base font-semibold text-white">Lv.{{ d.rank }}</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-black/30 rounded-full px-3 py-1 backdrop-blur-sm">
+                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="text-base font-semibold text-white">{{ d.hours_played }}h</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <h2 class="text-white">基本信息</h2>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mx-5 p-4 rounded-lg bg-gray-800 {{ current_bg_opacity_class }}">
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">击杀</div>
-            <div class="text-2xl font-bold font-mono">{{ d.kills }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">K/D</div>
-            <div class="text-2xl font-bold font-mono">{{ d.kill_death }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">KPM</div>
-            <div class="text-2xl font-bold font-mono">{{ d.kills_per_minute }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">爆头率</div>
-            <div class="text-2xl font-bold font-mono">{{ d.headshots }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">命中率</div>
-            <div class="text-2xl font-bold font-mono">{{ d.accuracy }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">急救</div>
-            <div class="text-2xl font-bold font-mono">{{ d.revives }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">爆头</div>
-            <div class="text-2xl font-bold font-mono">{{ d.head_shots_num }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">最远爆头</div>
-            <div class="text-2xl font-bold font-mono">{{ d.longest_head_shot }}m</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">胜利场次</div>
-            <div class="text-2xl font-bold font-mono">{{ d.wins }}</div>
-        </div>
-        <div class="text-center">
-            <div class="text-sm text-yellow-400">最高连杀</div>
-            <div class="text-2xl font-bold font-mono">{{ d.highest_kill_streak }}</div>
-        </div>
-    </div>
-
-    <h2 class="text-white">武器信息</h2>
-    <div class="flex flex-col gap-4 mx-5">
-        {% from "weapon_card.html" import weapon_card %}
-        {% if weapon_data is not none %}
-        {% for weapon in weapon_data %}
-        {{ weapon_card(w=weapon,game=game, bg_opacity_class=current_bg_opacity_class) }}
-        {% endfor %}
-        {% else %}
-        <div class="text-center text-slate-400 py-4">暂无武器数据</div>
-        {% endif %}
-        <div class="text-center text-slate-400 text-sm mt-2">
-            使用
-            <span class="text-sky-500 font-mono">
-                weapons [玩家id],game={{ game }}
-            </span>
-            查看更多数据
+    <!-- ===== 基本信息 ===== -->
+    <div class="px-5 -mt-2 relative z-20">
+        <div class="glass-card p-5">
+            <div class="grid grid-cols-5 gap-3">
+                <div class="text-center">
+                    <div class="text-sm label font-medium uppercase tracking-wider">击杀</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ d.kills }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm label font-medium uppercase tracking-wider">K/D</div>
+                    <div class="text-xl font-bold font-mono gradient-text mt-0.5">{{ d.kill_death }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm label font-medium uppercase tracking-wider">KPM</div>
+                    <div class="text-xl font-bold font-mono gradient-text mt-0.5">{{ d.kills_per_minute }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm label font-medium uppercase tracking-wider">爆头率</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ d.headshots }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm label font-medium uppercase tracking-wider">命中率</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ d.accuracy }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm label font-medium uppercase tracking-wider">急救</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ d.revives }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm label font-medium uppercase tracking-wider">爆头</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ d.head_shots_num }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm label font-medium uppercase tracking-wider">最远爆头</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ d.longest_head_shot }}m</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm label font-medium uppercase tracking-wider">胜利场次</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ d.wins }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm label font-medium uppercase tracking-wider">最高连杀</div>
+                    <div class="text-xl font-bold font-mono text-white mt-0.5">{{ d.highest_kill_streak }}</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <h2 class="text-white">载具信息</h2>
-    <div class="flex flex-col gap-4 mx-5">
-        {% from "vehicle_card.html" import vehicle_card %}
-        {% if vehicle_data is not none %}
-        {% for vehicle in vehicle_data %}
-        {{ vehicle_card(v=vehicle, game=game, bg_opacity_class=current_bg_opacity_class) }}
-        {% endfor %}
-        {% else %}
-        <div class="text-center text-slate-400 py-4">暂无载具数据</div>
-        {% endif %}
-        <div class="text-center text-slate-400 text-sm mt-1">
-            使用
-            <span class="text-sky-500 font-mono">
-                vehicles [玩家id],game={{ game }}
-            </span>
-            查看更多数据
+    <!-- ===== 武器信息 ===== -->
+    <div class="px-5 mt-4">
+        <div class="flex items-center gap-2 mb-3 px-1">
+            <div class="w-1 h-5 rounded-full" style="background: linear-gradient(to bottom, var(--accent-from), var(--accent-to));"></div>
+            <h2 class="text-sm font-bold uppercase tracking-widest label">武器信息</h2>
+        </div>
+        <div class="flex flex-col gap-2">
+            {% from "weapon_card.html" import weapon_card %}
+            {% if weapon_data is not none %}
+            {% for weapon in weapon_data %}
+            {{ weapon_card(w=weapon, game=game) }}
+            {% endfor %}
+            {% else %}
+            <div class="glass-card text-center text-white/60 py-6 text-sm">暂无武器数据</div>
+            {% endif %}
+        </div>
+        <div class="text-center text-white/50 text-xs mt-2">
+            使用 <span class="text-cyan-400 font-mono">weapons [玩家id],game={{ game }}</span> 查看更多
         </div>
     </div>
-    <div class="flex flex-col justify-center items-center text-slate-400 py-3">
-        <span>powered by astrbot</span>
-        <span>数据更新时间：{{ update_time }}</span>
+
+    <!-- ===== 载具信息 ===== -->
+    <div class="px-5 mt-4 mb-2">
+        <div class="flex items-center gap-2 mb-3 px-1">
+            <div class="w-1 h-5 rounded-full" style="background: linear-gradient(to bottom, var(--accent-from), var(--accent-to));"></div>
+            <h2 class="text-sm font-bold uppercase tracking-widest label">载具信息</h2>
+        </div>
+        <div class="flex flex-col gap-2">
+            {% from "vehicle_card.html" import vehicle_card %}
+            {% if vehicle_data is not none %}
+            {% for vehicle in vehicle_data %}
+            {{ vehicle_card(v=vehicle, game=game) }}
+            {% endfor %}
+            {% else %}
+            <div class="glass-card text-center text-white/60 py-6 text-sm">暂无载具数据</div>
+            {% endif %}
+        </div>
+        <div class="text-center text-white/50 text-xs mt-2">
+            使用 <span class="text-cyan-400 font-mono">vehicles [玩家id],game={{ game }}</span> 查看更多
+        </div>
+    </div>
+
+    <!-- ===== 底部 ===== -->
+    <div class="flex flex-col items-center text-white/60 py-4 mt-2">
+        <div class="section-divider w-2/3 mb-3"></div>
+        <span class="text-xs tracking-wider uppercase">powered by astrbot</span>
+        <span class="text-[10px] mt-0.5 text-white/50">数据更新时间：{{ update_time }}</span>
     </div>
 </body>
 

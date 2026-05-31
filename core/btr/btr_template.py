@@ -52,6 +52,7 @@ async def btr_main_html_builder(stat_data: dict, weapons_data, vehicles_data, so
             构建的Html
     """
     background_color = GameMappings.BACKGROUND_COLORS.get(game, BackgroundColors.BF2042_BACKGROUND_COLOR)
+    accent_from, accent_to = GameMappings.ACCENT_COLORS.get(game, ("#f59e0b", "#ef4444"))
     update_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     weapons_data = sort_list_of_dicts(weapons_data, "stats.kills.value")
@@ -86,6 +87,8 @@ async def btr_main_html_builder(stat_data: dict, weapons_data, vehicles_data, so
         soldier_data=soldiers_entities,
         game=game,
         background_color=background_color,
+        accent_from=accent_from,
+        accent_to=accent_to,
     )
     return html
 
@@ -106,6 +109,7 @@ async def btr_weapons_html_builder(stat_data: dict, weapons_data, vehicles_data,
     weapons_data = sort_list_of_dicts(weapons_data, "stats.kills.value")
     soldier_data = sort_list_of_dicts(soldier_data, "stats.kills.value")
     background_color = GameMappings.BACKGROUND_COLORS.get(game, BackgroundColors.BF2042_BACKGROUND_COLOR)
+    accent_from, accent_to = GameMappings.ACCENT_COLORS.get(game, ("#f59e0b", "#ef4444"))
     update_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     # 创建对象
@@ -131,6 +135,8 @@ async def btr_weapons_html_builder(stat_data: dict, weapons_data, vehicles_data,
         weapon_data=weapons_entities,
         game=game,
         background_color=background_color,
+        accent_from=accent_from,
+        accent_to=accent_to,
     )
     return html
 
@@ -152,6 +158,7 @@ async def btr_vehicles_html_builder(stat_data: dict, weapons_data, vehicles_data
     vehicles_data = sort_list_of_dicts(vehicles_data, "stats.kills.value")
     soldier_data = sort_list_of_dicts(soldier_data, "stats.kills.value")
     background_color = GameMappings.BACKGROUND_COLORS.get(game, BackgroundColors.BF2042_BACKGROUND_COLOR)
+    accent_from, accent_to = GameMappings.ACCENT_COLORS.get(game, ("#f59e0b", "#ef4444"))
     update_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     # 创建对象
@@ -176,6 +183,8 @@ async def btr_vehicles_html_builder(stat_data: dict, weapons_data, vehicles_data
         vehicle_data=vehicles_entities,
         game=game,
         background_color=background_color,
+        accent_from=accent_from,
+        accent_to=accent_to,
     )
     return html
 
@@ -194,6 +203,7 @@ async def btr_soldier_html_builder(stat_data: dict, weapons_data, vehicles_data,
     """
     soldier_data = sort_list_of_dicts(soldier_data, "stats.kills.value")
     background_color = GameMappings.BACKGROUND_COLORS.get(game, BackgroundColors.BF2042_BACKGROUND_COLOR)
+    accent_from, accent_to = GameMappings.ACCENT_COLORS.get(game, ("#f59e0b", "#ef4444"))
     update_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     if game == "bf6":
         stat_entity = await PlayerStats.from_bf6_dict(stat_data)
@@ -216,6 +226,8 @@ async def btr_soldier_html_builder(stat_data: dict, weapons_data, vehicles_data,
         soldier_data=soldiers_entities,
         game=game,
         background_color=background_color,
+        accent_from=accent_from,
+        accent_to=accent_to,
     )
     return html
 
