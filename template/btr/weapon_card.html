@@ -42,7 +42,7 @@
             {% if game == 'bf6' %}
             <div>
                 <div class="text-sm label uppercase tracking-wider">精通等级</div>
-                <div class="text-base font-bold font-mono text-white mt-0.5">{{ weapon_entity.mastery_level }}</div>
+                <div class="text-base font-bold font-mono text-white mt-0.5">{{ weapon_entity.mastery_level or "--" }}</div>
             </div>
             {% endif %}
             {% if game == 'bf2042' %}
