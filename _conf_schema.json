@@ -1,6 +1,6 @@
 {
   "default_game": {
-    "hint": "默认查询哪一代战地，可选值：[bf4,bf1,bfv,bf2042]",
+    "hint": "默认查询哪一代战地，可选值：[bf4,bf1,bfv,bf2042,bf6]",
     "description": "默认查询",
     "type": "string",
     "default": "bfv"
